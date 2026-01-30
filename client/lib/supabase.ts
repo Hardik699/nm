@@ -115,7 +115,8 @@ export const uploadBase64ToSupabase = async (
  */
 export const deleteFileFromSupabase = async (filePath: string) => {
   try {
-    const { error } = await supabase.storage
+    const client = getSupabaseClient();
+    const { error } = await client.storage
       .from(bucketName)
       .remove([filePath]);
 
