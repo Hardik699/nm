@@ -60,15 +60,16 @@ export class GoogleSheetsSync {
     spreadsheetUrl?: string;
   }> {
     try {
-      if (!this.isEnabled) {
+      if (!this.configChecked) {
         await this.checkConfiguration();
-        if (!this.isEnabled) {
-          return {
-            success: false,
-            message:
-              "Google Sheets is not configured. Please set up Google Sheets integration first.",
-          };
-        }
+      }
+
+      if (!this.isEnabled) {
+        return {
+          success: false,
+          message:
+            "Google Sheets is not configured. Please set up Google Sheets integration first.",
+        };
       }
 
       // Get data from localStorage
