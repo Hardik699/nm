@@ -70,6 +70,7 @@ export const uploadBase64ToSupabase = async (
   fileName: string
 ): Promise<string> => {
   try {
+    const client = getSupabaseClient();
     // Convert base64 to blob
     const byteCharacters = atob(base64Data.split(",")[1] || base64Data);
     const byteNumbers = new Array(byteCharacters.length);
@@ -85,7 +86,7 @@ export const uploadBase64ToSupabase = async (
     const filePath = `${folderPath}/${uniqueFileName}`;
 
     // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
+    const { data, error } = await client.storage
       .from(bucketName)
       .upload(filePath, blob, {
         cacheControl: "3600",
@@ -97,7 +98,7 @@ export const uploadBase64ToSupabase = async (
     }
 
     // Get public URL
-    const { data: publicUrlData } = supabase.storage
+    const { data: publicUrlData } = client.storage
       .from(bucketName)
       .getPublicUrl(filePath);
 
