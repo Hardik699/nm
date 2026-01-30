@@ -217,7 +217,7 @@ export default function SystemInfoDetail() {
     setShowForm(true);
   };
 
-  const save = (e: React.FormEvent) => {
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isVonage) {
       if (
