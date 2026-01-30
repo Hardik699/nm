@@ -39,6 +39,8 @@ import {
   canonical,
   type Asset,
 } from "@/lib/systemAssets";
+import { systemAssetsApi } from "@/lib/api-system-assets";
+import { toast } from "sonner";
 
 const registry: Record<
   string,
