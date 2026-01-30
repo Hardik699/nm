@@ -17,6 +17,8 @@ import { itAccountsRouter } from "./routes/it-accounts";
 import { attendanceRouter } from "./routes/attendance";
 import { leaveRequestsRouter } from "./routes/leave-requests";
 import { salaryRecordsRouter } from "./routes/salary-records";
+import { systemAssetsRouter } from "./routes/system-assets";
+import { pcLaptopsRouter } from "./routes/pc-laptops";
 
 export function createServer() {
   const app = express();
