@@ -151,5 +151,5 @@ export const useGoogleSheetsAutoSync = () => {
     googleSheetsSync.autoSync();
   };
 
-  return { triggerAutoSync, isConfigured: googleSheetsSync.isConfigured() };
+  return { triggerAutoSync, isConfigured: googleSheetsSync.isConfiguredSync() };
 };
