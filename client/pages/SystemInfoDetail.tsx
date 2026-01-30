@@ -155,6 +155,7 @@ export default function SystemInfoDetail() {
 
   const [assets, setAssets] = useState<Asset[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     id: "",
     serialNumber: "",
@@ -174,8 +175,20 @@ export default function SystemInfoDetail() {
   });
 
   useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    setAssets(raw ? JSON.parse(raw) : []);
+    const loadAssets = async () => {
+      try {
+        setLoading(true);
+        const data = await systemAssetsApi.getAll();
+        setAssets(data);
+      } catch (error) {
+        console.error("Error loading assets:", error);
+        toast.error("Failed to load system assets");
+        setAssets([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAssets();
   }, []);
 
   const filtered = useMemo(
