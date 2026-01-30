@@ -6,7 +6,9 @@ let isConnected = false;
 
 export async function connectDB() {
   if (!MONGODB_URI) {
-    console.warn("⚠️  MONGODB_URI environment variable is not set. MongoDB features will not be available.");
+    console.warn(
+      "⚠️  MONGODB_URI environment variable is not set. MongoDB features will not be available.",
+    );
     return;
   }
 

@@ -24,7 +24,7 @@ function getSupabaseClient() {
  */
 export const uploadFileToSupabase = async (
   file: File,
-  folderPath: string
+  folderPath: string,
 ): Promise<string> => {
   try {
     const client = getSupabaseClient();
@@ -67,7 +67,7 @@ export const uploadFileToSupabase = async (
 export const uploadBase64ToSupabase = async (
   base64Data: string,
   folderPath: string,
-  fileName: string
+  fileName: string,
 ): Promise<string> => {
   try {
     const client = getSupabaseClient();
@@ -116,9 +116,7 @@ export const uploadBase64ToSupabase = async (
 export const deleteFileFromSupabase = async (filePath: string) => {
   try {
     const client = getSupabaseClient();
-    const { error } = await client.storage
-      .from(bucketName)
-      .remove([filePath]);
+    const { error } = await client.storage.from(bucketName).remove([filePath]);
 
     if (error) {
       throw new Error(`Delete failed: ${error.message}`);
