@@ -714,7 +714,7 @@ export default function SystemInfoDetail() {
                       isVonage ? (
                         <TableRow key={a.id}>
                           <TableCell className="font-medium">{a.id}</TableCell>
-                          <TableCell>{a.companyName}</TableCell>
+                          <TableCell>{a.company}</TableCell>
                           <TableCell>{a.vonageNumber}</TableCell>
                           <TableCell>{a.vonageExtCode}</TableCell>
                           <TableCell>{a.vonagePassword}</TableCell>
@@ -724,7 +724,7 @@ export default function SystemInfoDetail() {
                       ) : (
                         <TableRow key={a.id}>
                           <TableCell className="font-medium">{a.id}</TableCell>
-                          <TableCell>{a.companyName}</TableCell>
+                          <TableCell>{a.company}</TableCell>
                           <TableCell>{a.serialNumber}</TableCell>
                           {categoryKey === "ram" && (
                             <TableCell>{(a as any).ramSize || "-"}</TableCell>
