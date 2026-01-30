@@ -4,11 +4,17 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const bucketName = import.meta.env.VITE_SUPABASE_BUCKET || "Infoseum";
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing Supabase credentials");
-}
+let supabase: any = null;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+function getSupabaseClient() {
+  if (!supabase) {
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error("Missing Supabase credentials");
+    }
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+  }
+  return supabase;
+}
 
 /**
  * Upload a file to Supabase Storage
@@ -18,16 +24,17 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
  */
 export const uploadFileToSupabase = async (
   file: File,
-  folderPath: string
+  folderPath: string,
 ): Promise<string> => {
   try {
+    const client = getSupabaseClient();
     // Create unique filename
     const timestamp = Date.now();
     const fileName = `${timestamp}-${file.name}`;
     const filePath = `${folderPath}/${fileName}`;
 
     // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
+    const { data, error } = await client.storage
       .from(bucketName)
       .upload(filePath, file, {
         cacheControl: "3600",
@@ -39,7 +46,7 @@ export const uploadFileToSupabase = async (
     }
 
     // Get public URL
-    const { data: publicUrlData } = supabase.storage
+    const { data: publicUrlData } = client.storage
       .from(bucketName)
       .getPublicUrl(filePath);
 
@@ -60,9 +67,10 @@ export const uploadFileToSupabase = async (
 export const uploadBase64ToSupabase = async (
   base64Data: string,
   folderPath: string,
-  fileName: string
+  fileName: string,
 ): Promise<string> => {
   try {
+    const client = getSupabaseClient();
     // Convert base64 to blob
     const byteCharacters = atob(base64Data.split(",")[1] || base64Data);
     const byteNumbers = new Array(byteCharacters.length);
@@ -78,7 +86,7 @@ export const uploadBase64ToSupabase = async (
     const filePath = `${folderPath}/${uniqueFileName}`;
 
     // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
+    const { data, error } = await client.storage
       .from(bucketName)
       .upload(filePath, blob, {
         cacheControl: "3600",
@@ -90,7 +98,7 @@ export const uploadBase64ToSupabase = async (
     }
 
     // Get public URL
-    const { data: publicUrlData } = supabase.storage
+    const { data: publicUrlData } = client.storage
       .from(bucketName)
       .getPublicUrl(filePath);
 
@@ -107,9 +115,8 @@ export const uploadBase64ToSupabase = async (
  */
 export const deleteFileFromSupabase = async (filePath: string) => {
   try {
-    const { error } = await supabase.storage
-      .from(bucketName)
-      .remove([filePath]);
+    const client = getSupabaseClient();
+    const { error } = await client.storage.from(bucketName).remove([filePath]);
 
     if (error) {
       throw new Error(`Delete failed: ${error.message}`);
