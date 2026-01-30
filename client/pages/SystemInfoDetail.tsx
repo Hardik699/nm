@@ -665,7 +665,9 @@ export default function SystemInfoDetail() {
             <CardTitle className="text-white">Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {filtered.length === 0 ? (
+            {loading ? (
+              <div className="text-slate-300 text-center py-8">Loading...</div>
+            ) : filtered.length === 0 ? (
               <div className="text-slate-300">No records</div>
             ) : (
               <div className="overflow-auto">
