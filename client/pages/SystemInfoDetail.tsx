@@ -744,10 +744,10 @@ export default function SystemInfoDetail() {
                           )}
                           {categoryKey === "storage" && (
                             <TableCell>
-                              {(a as any).storageCapacity || "-"}
+                              {(a as any).storageSize || "-"}
                             </TableCell>
                           )}
-                          <TableCell>{a.vendorName}</TableCell>
+                          <TableCell>{a.vendor}</TableCell>
                           <TableCell>{a.purchaseDate}</TableCell>
                           <TableCell>{a.warrantyEndDate}</TableCell>
                         </TableRow>
