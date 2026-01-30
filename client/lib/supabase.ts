@@ -4,11 +4,17 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const bucketName = import.meta.env.VITE_SUPABASE_BUCKET || "Infoseum";
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing Supabase credentials");
-}
+let supabase: any = null;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+function getSupabaseClient() {
+  if (!supabase) {
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error("Missing Supabase credentials");
+    }
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+  }
+  return supabase;
+}
 
 /**
  * Upload a file to Supabase Storage
