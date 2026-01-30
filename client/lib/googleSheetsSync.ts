@@ -3,9 +3,10 @@ export class GoogleSheetsSync {
   private static instance: GoogleSheetsSync;
   private isEnabled: boolean = false;
   private spreadsheetUrl: string = "";
+  private configChecked: boolean = false;
 
   private constructor() {
-    this.checkConfiguration();
+    // Don't check configuration in constructor - do it lazily
   }
 
   static getInstance(): GoogleSheetsSync {
@@ -23,17 +24,27 @@ export class GoogleSheetsSync {
 
       this.isEnabled = data.success && data.isConfigured;
       this.spreadsheetUrl = data.spreadsheetUrl || "";
+      this.configChecked = true;
 
       return this.isEnabled;
     } catch (error) {
       console.error("Failed to check Google Sheets configuration:", error);
       this.isEnabled = false;
+      this.configChecked = true;
       return false;
     }
   }
 
-  // Get current status
-  isConfigured(): boolean {
+  // Get current status (lazy-load if not checked yet)
+  async isConfigured(): Promise<boolean> {
+    if (!this.configChecked) {
+      await this.checkConfiguration();
+    }
+    return this.isEnabled;
+  }
+
+  // Synchronous version for quick checks (returns cached value)
+  isConfiguredSync(): boolean {
     return this.isEnabled;
   }
 
