@@ -249,8 +249,8 @@ export default function SystemInfoDetail() {
       id: form.id || nextWxId(assets, categoryKey),
       category: categoryKey,
       serialNumber: (form.serialNumber || "").trim(),
-      vendorName: form.vendorName.trim(),
-      companyName: form.companyName.trim(),
+      vendor: form.vendorName.trim(),
+      company: form.companyName.trim(),
       purchaseDate: form.purchaseDate,
       warrantyEndDate: form.warrantyEndDate,
       createdAt: new Date().toISOString(),
@@ -258,24 +258,28 @@ export default function SystemInfoDetail() {
       vonageExtCode: form.vonageExtCode?.trim(),
       vonagePassword: form.vonagePassword,
       ramSize: categoryKey === "ram" ? (form.ramSize || "").trim() : undefined,
-      ramType: categoryKey === "ram" ? (form.ramType || "").trim() : undefined,
+      storageType:
+        categoryKey === "storage" ? (form.storageType || "").trim() : undefined,
+      storageSize:
+        categoryKey === "storage"
+          ? (form.storageCapacity || "").trim()
+          : undefined,
       processorModel:
         categoryKey === "motherboard"
           ? (form.processorModel || "").trim()
           : undefined,
-      storageType:
-        categoryKey === "storage" ? (form.storageType || "").trim() : undefined,
-      storageCapacity:
-        categoryKey === "storage"
-          ? (form.storageCapacity || "").trim()
-          : undefined,
     };
 
-    const next = [record, ...assets];
-    setAssets(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    setShowForm(false);
-    alert("Saved");
+    try {
+      await systemAssetsApi.create(record);
+      const updatedAssets = await systemAssetsApi.getAll();
+      setAssets(updatedAssets);
+      setShowForm(false);
+      toast.success("Asset saved successfully!");
+    } catch (error) {
+      console.error("Error saving asset:", error);
+      toast.error("Failed to save asset");
+    }
   };
 
   return (
