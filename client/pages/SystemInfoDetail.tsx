@@ -714,6 +714,233 @@ export default function SystemInfoDetail() {
           </Card>
         )}
 
+        {/* Asset Detail Modal */}
+        {selectedAsset && (
+          <Card className="bg-slate-900/50 border-slate-700 backdrop-blur-sm mb-8">
+            <CardHeader className="border-b border-slate-700">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-white text-xl">
+                  {selectedAsset.id} - Details
+                </CardTitle>
+                <Button
+                  onClick={() => {
+                    setSelectedAsset(null);
+                    setIsEditing(false);
+                    setEditForm(null);
+                  }}
+                  variant="outline"
+                  className="border-slate-600 text-slate-300"
+                >
+                  ✕ Close
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              {!isEditing ? (
+                <>
+                  {/* View Mode */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-slate-400 text-sm">ID</Label>
+                      <p className="text-white font-medium">{selectedAsset.id}</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-sm">Category</Label>
+                      <p className="text-white font-medium">{selectedAsset.category}</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-sm">Company</Label>
+                      <p className="text-white">{selectedAsset.company || "-"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-sm">Serial Number</Label>
+                      <p className="text-white">{selectedAsset.serialNumber || "-"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-sm">Vendor</Label>
+                      <p className="text-white">{selectedAsset.vendor || "-"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-sm">Purchase Date</Label>
+                      <p className="text-white">{selectedAsset.purchaseDate || "-"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-sm">Warranty End Date</Label>
+                      <p className="text-white">{selectedAsset.warrantyEndDate || "-"}</p>
+                    </div>
+                    {isVonage && (
+                      <>
+                        <div>
+                          <Label className="text-slate-400 text-sm">Vonage Number</Label>
+                          <p className="text-white">{selectedAsset.vonageNumber || "-"}</p>
+                        </div>
+                        <div>
+                          <Label className="text-slate-400 text-sm">Ext Code</Label>
+                          <p className="text-white">{selectedAsset.vonageExtCode || "-"}</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 pt-4 border-t border-slate-700">
+                    <Button
+                      onClick={handleEditAsset}
+                      className="bg-blue-500 hover:bg-blue-600 text-white"
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      onClick={() => setShowDeleteModal(true)}
+                      className="bg-red-500 hover:bg-red-600 text-white"
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Edit Mode */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-slate-300">Company</Label>
+                      <Input
+                        value={editForm?.company || ""}
+                        onChange={(e) =>
+                          setEditForm(
+                            editForm ? { ...editForm, company: e.target.value } : null
+                          )
+                        }
+                        className="bg-slate-800/50 border-slate-700 text-white"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-slate-300">Serial Number</Label>
+                      <Input
+                        value={editForm?.serialNumber || ""}
+                        onChange={(e) =>
+                          setEditForm(
+                            editForm
+                              ? { ...editForm, serialNumber: e.target.value }
+                              : null
+                          )
+                        }
+                        className="bg-slate-800/50 border-slate-700 text-white"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-slate-300">Vendor</Label>
+                      <Input
+                        value={editForm?.vendor || ""}
+                        onChange={(e) =>
+                          setEditForm(
+                            editForm ? { ...editForm, vendor: e.target.value } : null
+                          )
+                        }
+                        className="bg-slate-800/50 border-slate-700 text-white"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-slate-300">Purchase Date</Label>
+                      <Input
+                        type="date"
+                        value={editForm?.purchaseDate || ""}
+                        onChange={(e) =>
+                          setEditForm(
+                            editForm
+                              ? { ...editForm, purchaseDate: e.target.value }
+                              : null
+                          )
+                        }
+                        className="bg-slate-800/50 border-slate-700 text-white"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-slate-300">Warranty End Date</Label>
+                      <Input
+                        type="date"
+                        value={editForm?.warrantyEndDate || ""}
+                        onChange={(e) =>
+                          setEditForm(
+                            editForm
+                              ? { ...editForm, warrantyEndDate: e.target.value }
+                              : null
+                          )
+                        }
+                        className="bg-slate-800/50 border-slate-700 text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-4 border-t border-slate-700">
+                    <Button
+                      onClick={handleSaveEdit}
+                      className="bg-green-500 hover:bg-green-600 text-white"
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditForm(null);
+                      }}
+                      variant="outline"
+                      className="border-slate-600 text-slate-300"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && selectedAsset && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <Card className="bg-slate-900 border-slate-700 w-full max-w-md">
+              <CardHeader>
+                <CardTitle className="text-white text-xl flex items-center space-x-2">
+                  <span>🔒 Confirm Delete</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-slate-300">
+                  Are you sure you want to delete <strong>{selectedAsset.id}</strong>?
+                  <br />
+                  <br />
+                  Enter password to confirm:
+                </p>
+                <Input
+                  type="password"
+                  placeholder="Enter password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  className="bg-slate-800/50 border-slate-700 text-white"
+                />
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    onClick={handleDeleteAsset}
+                    className="flex-1 bg-red-500 hover:bg-red-600 text-white"
+                  >
+                    Delete
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowDeleteModal(false);
+                      setDeletePassword("");
+                    }}
+                    variant="outline"
+                    className="flex-1 border-slate-600 text-slate-300"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <Card className="bg-slate-900/50 border-slate-700 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-white">Details</CardTitle>
