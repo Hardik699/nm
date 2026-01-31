@@ -366,6 +366,163 @@ export default function EmployeeDetailsPage() {
       );
   };
 
+  const handleDownloadPDF = async () => {
+    if (!employee) return;
+
+    try {
+      const pdf = new jsPDF();
+      let yPosition = 20;
+
+      // Title
+      pdf.setFontSize(18);
+      pdf.text("Employee Details Report", 15, yPosition);
+      yPosition += 15;
+
+      // Add employee photo if available
+      if (employee.photo && employee.photo.startsWith("data:image")) {
+        try {
+          pdf.addImage(employee.photo, "PNG", 150, 10, 40, 40);
+        } catch (error) {
+          console.error("Error adding image:", error);
+        }
+      }
+
+      // Employee Basic Information
+      pdf.setFontSize(12);
+      pdf.text("Personal Information", 15, yPosition);
+      yPosition += 10;
+
+      pdf.setFontSize(10);
+      const basicInfo = [
+        ["Full Name:", employee.fullName],
+        ["Employee ID:", employee.employeeId],
+        ["Father's Name:", employee.fatherName],
+        ["Mother's Name:", employee.motherName],
+        ["Birth Date:", employee.birthDate],
+        ["Blood Group:", employee.bloodGroup],
+        ["Email:", employee.email],
+        ["Mobile Number:", employee.mobileNumber],
+        ["Emergency Mobile:", employee.emergencyMobileNumber],
+        ["Address:", employee.address],
+      ];
+
+      basicInfo.forEach((info) => {
+        pdf.text(`${info[0]} ${info[1]}`, 15, yPosition);
+        yPosition += 8;
+        if (yPosition > 270) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+      });
+
+      yPosition += 5;
+
+      // Job Information
+      pdf.setFontSize(12);
+      pdf.text("Job Information", 15, yPosition);
+      yPosition += 10;
+
+      pdf.setFontSize(10);
+      const jobInfo = [
+        ["Department:", employee.department],
+        ["Position:", employee.position],
+        ["Joining Date:", employee.joiningDate],
+        ["Salary:", employee.salary],
+        ["Table Number:", employee.tableNumber],
+      ];
+
+      jobInfo.forEach((info) => {
+        pdf.text(`${info[0]} ${info[1]}`, 15, yPosition);
+        yPosition += 8;
+        if (yPosition > 270) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+      });
+
+      yPosition += 5;
+
+      // Banking Details
+      pdf.setFontSize(12);
+      pdf.text("Banking Details", 15, yPosition);
+      yPosition += 10;
+
+      pdf.setFontSize(10);
+      const bankInfo = [
+        ["Account Number:", employee.accountNumber],
+        ["IFSC Code:", employee.ifscCode],
+        ["Aadhaar Number:", employee.aadhaarNumber],
+        ["PAN Number:", employee.panNumber],
+        ["UAN Number:", employee.uanNumber],
+      ];
+
+      bankInfo.forEach((info) => {
+        pdf.text(`${info[0]} ${info[1]}`, 15, yPosition);
+        yPosition += 8;
+        if (yPosition > 270) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+      });
+
+      // Documents Section
+      const documentKeys = [
+        { key: "aadhaarCard", label: "Aadhaar Card" },
+        { key: "panCard", label: "PAN Card" },
+        { key: "passport", label: "Passport" },
+        { key: "drivingLicense", label: "Driving License" },
+        { key: "resume", label: "Resume/CV" },
+        { key: "medicalCertificate", label: "Medical Certificate" },
+        { key: "educationCertificate", label: "Education Certificate" },
+        { key: "experienceLetter", label: "Experience Letter" },
+        { key: "bankPassbook", label: "Bank Passbook" },
+      ];
+
+      yPosition += 10;
+      pdf.setFontSize(12);
+      pdf.text("Documents", 15, yPosition);
+      yPosition += 10;
+
+      // Add document images
+      for (const docType of documentKeys) {
+        const docValue = employee[docType.key as keyof Employee];
+        if (docValue && typeof docValue === "string") {
+          try {
+            pdf.setFontSize(10);
+            pdf.text(`${docType.label}:`, 15, yPosition);
+            yPosition += 8;
+
+            if (docValue.startsWith("data:image")) {
+              pdf.addImage(docValue, "PNG", 20, yPosition, 170, 100);
+              yPosition += 110;
+            } else if (docValue.startsWith("data:application/pdf")) {
+              pdf.text("[PDF Document - View in original source]", 20, yPosition);
+              yPosition += 8;
+            }
+
+            if (yPosition > 250) {
+              pdf.addPage();
+              yPosition = 20;
+            }
+          } catch (error) {
+            console.error(`Error adding ${docType.label}:`, error);
+          }
+        }
+      }
+
+      // Generate filename with employee name and date
+      const fileName = `${employee.employeeId}_${employee.fullName
+        .replace(/\s+/g, "_")
+        .toLowerCase()}_${new Date().toISOString().split("T")[0]}.pdf`;
+
+      pdf.save(fileName);
+      toast.success("PDF downloaded successfully!");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to generate PDF");
+    }
+  };
+
   if (!employee) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-deep-900 via-blue-deep-800 to-slate-900">
