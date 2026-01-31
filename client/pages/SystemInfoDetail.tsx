@@ -766,7 +766,11 @@ export default function SystemInfoDetail() {
                   <TableBody>
                     {filtered.map((a) =>
                       isVonage ? (
-                        <TableRow key={a.id}>
+                        <TableRow
+                          key={a.id}
+                          onClick={() => handleViewAsset(a)}
+                          className="cursor-pointer hover:bg-slate-800/50 transition-colors"
+                        >
                           <TableCell className="font-medium">{a.id}</TableCell>
                           <TableCell>{a.company}</TableCell>
                           <TableCell>{a.vonageNumber}</TableCell>
@@ -776,7 +780,11 @@ export default function SystemInfoDetail() {
                           <TableCell>{a.warrantyEndDate}</TableCell>
                         </TableRow>
                       ) : (
-                        <TableRow key={a.id}>
+                        <TableRow
+                          key={a.id}
+                          onClick={() => handleViewAsset(a)}
+                          className="cursor-pointer hover:bg-slate-800/50 transition-colors"
+                        >
                           <TableCell className="font-medium">{a.id}</TableCell>
                           <TableCell>{a.company}</TableCell>
                           <TableCell>{a.serialNumber}</TableCell>
