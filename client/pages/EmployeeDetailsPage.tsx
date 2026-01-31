@@ -39,10 +39,18 @@ import {
   CalendarDays,
   UserX,
   Download,
+  MoreVertical,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { uploadBase64ToSupabase } from "@/lib/supabase";
 import AppNav from "@/components/Navigation";
+import jsPDF from "jspdf";
 
 interface Employee {
   id: string;
