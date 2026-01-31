@@ -63,7 +63,7 @@ export const updateAsset: RequestHandler = async (req, res) => {
     const asset = await SystemAsset.findOneAndUpdate(
       { id },
       { ...assetData, updatedAt: new Date() },
-      { new: true }
+      { new: true },
     );
     if (!asset) {
       res.status(404).json({ error: "Asset not found" });

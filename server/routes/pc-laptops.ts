@@ -51,7 +51,7 @@ export const updatePCLaptop: RequestHandler = async (req, res) => {
     const item = await PCLaptop.findOneAndUpdate(
       { id },
       { ...itemData, updatedAt: new Date() },
-      { new: true }
+      { new: true },
     );
     if (!item) {
       res.status(404).json({ error: "PC/Laptop not found" });

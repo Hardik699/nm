@@ -743,41 +743,69 @@ export default function SystemInfoDetail() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label className="text-slate-400 text-sm">ID</Label>
-                      <p className="text-white font-medium">{selectedAsset.id}</p>
+                      <p className="text-white font-medium">
+                        {selectedAsset.id}
+                      </p>
                     </div>
                     <div>
                       <Label className="text-slate-400 text-sm">Category</Label>
-                      <p className="text-white font-medium">{selectedAsset.category}</p>
+                      <p className="text-white font-medium">
+                        {selectedAsset.category}
+                      </p>
                     </div>
                     <div>
                       <Label className="text-slate-400 text-sm">Company</Label>
-                      <p className="text-white">{selectedAsset.company || "-"}</p>
+                      <p className="text-white">
+                        {selectedAsset.company || "-"}
+                      </p>
                     </div>
                     <div>
-                      <Label className="text-slate-400 text-sm">Serial Number</Label>
-                      <p className="text-white">{selectedAsset.serialNumber || "-"}</p>
+                      <Label className="text-slate-400 text-sm">
+                        Serial Number
+                      </Label>
+                      <p className="text-white">
+                        {selectedAsset.serialNumber || "-"}
+                      </p>
                     </div>
                     <div>
                       <Label className="text-slate-400 text-sm">Vendor</Label>
-                      <p className="text-white">{selectedAsset.vendor || "-"}</p>
+                      <p className="text-white">
+                        {selectedAsset.vendor || "-"}
+                      </p>
                     </div>
                     <div>
-                      <Label className="text-slate-400 text-sm">Purchase Date</Label>
-                      <p className="text-white">{selectedAsset.purchaseDate || "-"}</p>
+                      <Label className="text-slate-400 text-sm">
+                        Purchase Date
+                      </Label>
+                      <p className="text-white">
+                        {selectedAsset.purchaseDate || "-"}
+                      </p>
                     </div>
                     <div>
-                      <Label className="text-slate-400 text-sm">Warranty End Date</Label>
-                      <p className="text-white">{selectedAsset.warrantyEndDate || "-"}</p>
+                      <Label className="text-slate-400 text-sm">
+                        Warranty End Date
+                      </Label>
+                      <p className="text-white">
+                        {selectedAsset.warrantyEndDate || "-"}
+                      </p>
                     </div>
                     {isVonage && (
                       <>
                         <div>
-                          <Label className="text-slate-400 text-sm">Vonage Number</Label>
-                          <p className="text-white">{selectedAsset.vonageNumber || "-"}</p>
+                          <Label className="text-slate-400 text-sm">
+                            Vonage Number
+                          </Label>
+                          <p className="text-white">
+                            {selectedAsset.vonageNumber || "-"}
+                          </p>
                         </div>
                         <div>
-                          <Label className="text-slate-400 text-sm">Ext Code</Label>
-                          <p className="text-white">{selectedAsset.vonageExtCode || "-"}</p>
+                          <Label className="text-slate-400 text-sm">
+                            Ext Code
+                          </Label>
+                          <p className="text-white">
+                            {selectedAsset.vonageExtCode || "-"}
+                          </p>
                         </div>
                       </>
                     )}
@@ -808,7 +836,9 @@ export default function SystemInfoDetail() {
                         value={editForm?.company || ""}
                         onChange={(e) =>
                           setEditForm(
-                            editForm ? { ...editForm, company: e.target.value } : null
+                            editForm
+                              ? { ...editForm, company: e.target.value }
+                              : null,
                           )
                         }
                         className="bg-slate-800/50 border-slate-700 text-white"
@@ -822,7 +852,7 @@ export default function SystemInfoDetail() {
                           setEditForm(
                             editForm
                               ? { ...editForm, serialNumber: e.target.value }
-                              : null
+                              : null,
                           )
                         }
                         className="bg-slate-800/50 border-slate-700 text-white"
@@ -834,7 +864,9 @@ export default function SystemInfoDetail() {
                         value={editForm?.vendor || ""}
                         onChange={(e) =>
                           setEditForm(
-                            editForm ? { ...editForm, vendor: e.target.value } : null
+                            editForm
+                              ? { ...editForm, vendor: e.target.value }
+                              : null,
                           )
                         }
                         className="bg-slate-800/50 border-slate-700 text-white"
@@ -849,14 +881,16 @@ export default function SystemInfoDetail() {
                           setEditForm(
                             editForm
                               ? { ...editForm, purchaseDate: e.target.value }
-                              : null
+                              : null,
                           )
                         }
                         className="bg-slate-800/50 border-slate-700 text-white"
                       />
                     </div>
                     <div>
-                      <Label className="text-slate-300">Warranty End Date</Label>
+                      <Label className="text-slate-300">
+                        Warranty End Date
+                      </Label>
                       <Input
                         type="date"
                         value={editForm?.warrantyEndDate || ""}
@@ -864,7 +898,7 @@ export default function SystemInfoDetail() {
                           setEditForm(
                             editForm
                               ? { ...editForm, warrantyEndDate: e.target.value }
-                              : null
+                              : null,
                           )
                         }
                         className="bg-slate-800/50 border-slate-700 text-white"
@@ -907,7 +941,8 @@ export default function SystemInfoDetail() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-slate-300">
-                  Are you sure you want to delete <strong>{selectedAsset.id}</strong>?
+                  Are you sure you want to delete{" "}
+                  <strong>{selectedAsset.id}</strong>?
                   <br />
                   <br />
                   Enter password to confirm:
