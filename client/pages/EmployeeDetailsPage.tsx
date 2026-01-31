@@ -558,14 +558,41 @@ export default function EmployeeDetailsPage() {
               </p>
             </div>
           </div>
-          <Button
-            onClick={() => navigate("/hr")}
-            variant="outline"
-            className="border-slate-600 text-slate-300 hover:bg-slate-700"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to HR Dashboard
-          </Button>
+          <div className="flex gap-2">
+            {/* 3-dot Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="bg-slate-800 border-slate-700 text-white"
+                align="end"
+              >
+                <DropdownMenuItem
+                  onClick={handleDownloadPDF}
+                  className="focus:bg-slate-700 cursor-pointer"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button
+              onClick={() => navigate("/hr")}
+              variant="outline"
+              className="border-slate-600 text-slate-300 hover:bg-slate-700"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to HR Dashboard
+            </Button>
+          </div>
         </div>
 
         {/* Tabs */}
