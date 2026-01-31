@@ -31,6 +31,7 @@ import {
   Camera,
   Monitor,
   Phone,
+  Trash2,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -39,6 +40,8 @@ import {
   canonical,
   type Asset,
 } from "@/lib/systemAssets";
+import { systemAssetsApi } from "@/lib/api-system-assets";
+import { toast } from "sonner";
 
 const registry: Record<
   string,
@@ -153,6 +156,12 @@ export default function SystemInfoDetail() {
 
   const [assets, setAssets] = useState<Asset[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [editForm, setEditForm] = useState<Asset | null>(null);
   const [form, setForm] = useState({
     id: "",
     serialNumber: "",
@@ -172,8 +181,20 @@ export default function SystemInfoDetail() {
   });
 
   useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    setAssets(raw ? JSON.parse(raw) : []);
+    const loadAssets = async () => {
+      try {
+        setLoading(true);
+        const data = await systemAssetsApi.getAll();
+        setAssets(data);
+      } catch (error) {
+        console.error("Error loading assets:", error);
+        toast.error("Failed to load system assets");
+        setAssets([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAssets();
   }, []);
 
   const filtered = useMemo(
@@ -202,7 +223,56 @@ export default function SystemInfoDetail() {
     setShowForm(true);
   };
 
-  const save = (e: React.FormEvent) => {
+  const handleViewAsset = (asset: Asset) => {
+    setSelectedAsset(asset);
+    setIsEditing(false);
+    setEditForm(null);
+  };
+
+  const handleEditAsset = () => {
+    if (selectedAsset) {
+      setEditForm({ ...selectedAsset });
+      setIsEditing(true);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editForm || !selectedAsset) return;
+    try {
+      await systemAssetsApi.update(selectedAsset.id, editForm);
+      const updatedAssets = await systemAssetsApi.getAll();
+      setAssets(updatedAssets);
+      setSelectedAsset(editForm);
+      setIsEditing(false);
+      toast.success("Asset updated successfully!");
+    } catch (error) {
+      console.error("Error updating asset:", error);
+      toast.error("Failed to update asset");
+    }
+  };
+
+  const handleDeleteAsset = async () => {
+    if (!selectedAsset) return;
+    // Simple password check (in production, this should be more secure)
+    if (deletePassword !== "1") {
+      toast.error("Incorrect password!");
+      return;
+    }
+    try {
+      await systemAssetsApi.delete(selectedAsset.id);
+      const updatedAssets = await systemAssetsApi.getAll();
+      setAssets(updatedAssets);
+      setSelectedAsset(null);
+      setShowDeleteModal(false);
+      setDeletePassword("");
+      toast.success("Asset deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting asset:", error);
+      toast.error("Failed to delete asset");
+    }
+  };
+
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isVonage) {
       if (
@@ -234,8 +304,8 @@ export default function SystemInfoDetail() {
       id: form.id || nextWxId(assets, categoryKey),
       category: categoryKey,
       serialNumber: (form.serialNumber || "").trim(),
-      vendorName: form.vendorName.trim(),
-      companyName: form.companyName.trim(),
+      vendor: form.vendorName.trim(),
+      company: form.companyName.trim(),
       purchaseDate: form.purchaseDate,
       warrantyEndDate: form.warrantyEndDate,
       createdAt: new Date().toISOString(),
@@ -243,24 +313,28 @@ export default function SystemInfoDetail() {
       vonageExtCode: form.vonageExtCode?.trim(),
       vonagePassword: form.vonagePassword,
       ramSize: categoryKey === "ram" ? (form.ramSize || "").trim() : undefined,
-      ramType: categoryKey === "ram" ? (form.ramType || "").trim() : undefined,
+      storageType:
+        categoryKey === "storage" ? (form.storageType || "").trim() : undefined,
+      storageSize:
+        categoryKey === "storage"
+          ? (form.storageCapacity || "").trim()
+          : undefined,
       processorModel:
         categoryKey === "motherboard"
           ? (form.processorModel || "").trim()
           : undefined,
-      storageType:
-        categoryKey === "storage" ? (form.storageType || "").trim() : undefined,
-      storageCapacity:
-        categoryKey === "storage"
-          ? (form.storageCapacity || "").trim()
-          : undefined,
     };
 
-    const next = [record, ...assets];
-    setAssets(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    setShowForm(false);
-    alert("Saved");
+    try {
+      await systemAssetsApi.create(record);
+      const updatedAssets = await systemAssetsApi.getAll();
+      setAssets(updatedAssets);
+      setShowForm(false);
+      toast.success("Asset saved successfully!");
+    } catch (error) {
+      console.error("Error saving asset:", error);
+      toast.error("Failed to save asset");
+    }
   };
 
   return (
@@ -641,12 +715,276 @@ export default function SystemInfoDetail() {
           </Card>
         )}
 
+        {/* Asset Detail Modal */}
+        {selectedAsset && (
+          <Card className="bg-slate-900/50 border-slate-700 backdrop-blur-sm mb-8">
+            <CardHeader className="border-b border-slate-700">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-white text-xl">
+                  {selectedAsset.id} - Details
+                </CardTitle>
+                <Button
+                  onClick={() => {
+                    setSelectedAsset(null);
+                    setIsEditing(false);
+                    setEditForm(null);
+                  }}
+                  variant="outline"
+                  className="border-slate-600 text-slate-300"
+                >
+                  ✕ Close
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              {!isEditing ? (
+                <>
+                  {/* View Mode */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-slate-400 text-sm">ID</Label>
+                      <p className="text-white font-medium">
+                        {selectedAsset.id}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-sm">Category</Label>
+                      <p className="text-white font-medium">
+                        {selectedAsset.category}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-sm">Company</Label>
+                      <p className="text-white">
+                        {selectedAsset.company || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-sm">
+                        Serial Number
+                      </Label>
+                      <p className="text-white">
+                        {selectedAsset.serialNumber || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-sm">Vendor</Label>
+                      <p className="text-white">
+                        {selectedAsset.vendor || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-sm">
+                        Purchase Date
+                      </Label>
+                      <p className="text-white">
+                        {selectedAsset.purchaseDate || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-sm">
+                        Warranty End Date
+                      </Label>
+                      <p className="text-white">
+                        {selectedAsset.warrantyEndDate || "-"}
+                      </p>
+                    </div>
+                    {isVonage && (
+                      <>
+                        <div>
+                          <Label className="text-slate-400 text-sm">
+                            Vonage Number
+                          </Label>
+                          <p className="text-white">
+                            {selectedAsset.vonageNumber || "-"}
+                          </p>
+                        </div>
+                        <div>
+                          <Label className="text-slate-400 text-sm">
+                            Ext Code
+                          </Label>
+                          <p className="text-white">
+                            {selectedAsset.vonageExtCode || "-"}
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 pt-4 border-t border-slate-700">
+                    <Button
+                      onClick={handleEditAsset}
+                      className="bg-blue-500 hover:bg-blue-600 text-white"
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      onClick={() => setShowDeleteModal(true)}
+                      className="bg-red-500 hover:bg-red-600 text-white"
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Edit Mode */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-slate-300">Company</Label>
+                      <Input
+                        value={editForm?.company || ""}
+                        onChange={(e) =>
+                          setEditForm(
+                            editForm
+                              ? { ...editForm, company: e.target.value }
+                              : null,
+                          )
+                        }
+                        className="bg-slate-800/50 border-slate-700 text-white"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-slate-300">Serial Number</Label>
+                      <Input
+                        value={editForm?.serialNumber || ""}
+                        onChange={(e) =>
+                          setEditForm(
+                            editForm
+                              ? { ...editForm, serialNumber: e.target.value }
+                              : null,
+                          )
+                        }
+                        className="bg-slate-800/50 border-slate-700 text-white"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-slate-300">Vendor</Label>
+                      <Input
+                        value={editForm?.vendor || ""}
+                        onChange={(e) =>
+                          setEditForm(
+                            editForm
+                              ? { ...editForm, vendor: e.target.value }
+                              : null,
+                          )
+                        }
+                        className="bg-slate-800/50 border-slate-700 text-white"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-slate-300">Purchase Date</Label>
+                      <Input
+                        type="date"
+                        value={editForm?.purchaseDate || ""}
+                        onChange={(e) =>
+                          setEditForm(
+                            editForm
+                              ? { ...editForm, purchaseDate: e.target.value }
+                              : null,
+                          )
+                        }
+                        className="bg-slate-800/50 border-slate-700 text-white"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-slate-300">
+                        Warranty End Date
+                      </Label>
+                      <Input
+                        type="date"
+                        value={editForm?.warrantyEndDate || ""}
+                        onChange={(e) =>
+                          setEditForm(
+                            editForm
+                              ? { ...editForm, warrantyEndDate: e.target.value }
+                              : null,
+                          )
+                        }
+                        className="bg-slate-800/50 border-slate-700 text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-4 border-t border-slate-700">
+                    <Button
+                      onClick={handleSaveEdit}
+                      className="bg-green-500 hover:bg-green-600 text-white"
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditForm(null);
+                      }}
+                      variant="outline"
+                      className="border-slate-600 text-slate-300"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && selectedAsset && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <Card className="bg-slate-900 border-slate-700 w-full max-w-md">
+              <CardHeader>
+                <CardTitle className="text-white text-xl flex items-center space-x-2">
+                  <span>🔒 Confirm Delete</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-slate-300">
+                  Are you sure you want to delete{" "}
+                  <strong>{selectedAsset.id}</strong>?
+                  <br />
+                  <br />
+                  Enter password to confirm:
+                </p>
+                <Input
+                  type="password"
+                  placeholder="Enter password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  className="bg-slate-800/50 border-slate-700 text-white"
+                />
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    onClick={handleDeleteAsset}
+                    className="flex-1 bg-red-500 hover:bg-red-600 text-white"
+                  >
+                    Delete
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowDeleteModal(false);
+                      setDeletePassword("");
+                    }}
+                    variant="outline"
+                    className="flex-1 border-slate-600 text-slate-300"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <Card className="bg-slate-900/50 border-slate-700 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-white">Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {filtered.length === 0 ? (
+            {loading ? (
+              <div className="text-slate-300 text-center py-8">Loading...</div>
+            ) : filtered.length === 0 ? (
               <div className="text-slate-300">No records</div>
             ) : (
               <div className="overflow-auto">
@@ -691,9 +1029,13 @@ export default function SystemInfoDetail() {
                   <TableBody>
                     {filtered.map((a) =>
                       isVonage ? (
-                        <TableRow key={a.id}>
+                        <TableRow
+                          key={a.id}
+                          onClick={() => handleViewAsset(a)}
+                          className="cursor-pointer hover:bg-slate-800/50 transition-colors"
+                        >
                           <TableCell className="font-medium">{a.id}</TableCell>
-                          <TableCell>{a.companyName}</TableCell>
+                          <TableCell>{a.company}</TableCell>
                           <TableCell>{a.vonageNumber}</TableCell>
                           <TableCell>{a.vonageExtCode}</TableCell>
                           <TableCell>{a.vonagePassword}</TableCell>
@@ -701,9 +1043,13 @@ export default function SystemInfoDetail() {
                           <TableCell>{a.warrantyEndDate}</TableCell>
                         </TableRow>
                       ) : (
-                        <TableRow key={a.id}>
+                        <TableRow
+                          key={a.id}
+                          onClick={() => handleViewAsset(a)}
+                          className="cursor-pointer hover:bg-slate-800/50 transition-colors"
+                        >
                           <TableCell className="font-medium">{a.id}</TableCell>
-                          <TableCell>{a.companyName}</TableCell>
+                          <TableCell>{a.company}</TableCell>
                           <TableCell>{a.serialNumber}</TableCell>
                           {categoryKey === "ram" && (
                             <TableCell>{(a as any).ramSize || "-"}</TableCell>
@@ -723,10 +1069,10 @@ export default function SystemInfoDetail() {
                           )}
                           {categoryKey === "storage" && (
                             <TableCell>
-                              {(a as any).storageCapacity || "-"}
+                              {(a as any).storageSize || "-"}
                             </TableCell>
                           )}
-                          <TableCell>{a.vendorName}</TableCell>
+                          <TableCell>{a.vendor}</TableCell>
                           <TableCell>{a.purchaseDate}</TableCell>
                           <TableCell>{a.warrantyEndDate}</TableCell>
                         </TableRow>

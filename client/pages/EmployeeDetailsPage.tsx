@@ -39,10 +39,18 @@ import {
   CalendarDays,
   UserX,
   Download,
+  MoreVertical,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { uploadBase64ToSupabase } from "@/lib/supabase";
 import AppNav from "@/components/Navigation";
+import jsPDF from "jspdf";
 
 interface Employee {
   id: string;
@@ -171,7 +179,9 @@ export default function EmployeeDetailsPage() {
     const employees = JSON.parse(
       localStorage.getItem("hrEmployees") || "[]",
     ) as Employee[];
-    const dept = JSON.parse(localStorage.getItem("departments") || "[]") as Department[];
+    const dept = JSON.parse(
+      localStorage.getItem("departments") || "[]",
+    ) as Department[];
     const salary = JSON.parse(
       localStorage.getItem("salaryRecords") || "[]",
     ) as SalaryRecord[];
@@ -234,9 +244,7 @@ export default function EmployeeDetailsPage() {
         employees
           .filter(
             (e) =>
-              e.status === "active" &&
-              e.id !== employee.id &&
-              e.tableNumber,
+              e.status === "active" && e.id !== employee.id && e.tableNumber,
           )
           .map((e) => parseInt(e.tableNumber, 10))
           .filter((x) => !Number.isNaN(x)),
@@ -358,6 +366,167 @@ export default function EmployeeDetailsPage() {
       );
   };
 
+  const handleDownloadPDF = async () => {
+    if (!employee) return;
+
+    try {
+      const pdf = new jsPDF();
+      let yPosition = 20;
+
+      // Title
+      pdf.setFontSize(18);
+      pdf.text("Employee Details Report", 15, yPosition);
+      yPosition += 15;
+
+      // Add employee photo if available
+      if (employee.photo && employee.photo.startsWith("data:image")) {
+        try {
+          pdf.addImage(employee.photo, "PNG", 150, 10, 40, 40);
+        } catch (error) {
+          console.error("Error adding image:", error);
+        }
+      }
+
+      // Employee Basic Information
+      pdf.setFontSize(12);
+      pdf.text("Personal Information", 15, yPosition);
+      yPosition += 10;
+
+      pdf.setFontSize(10);
+      const basicInfo = [
+        ["Full Name:", employee.fullName],
+        ["Employee ID:", employee.employeeId],
+        ["Father's Name:", employee.fatherName],
+        ["Mother's Name:", employee.motherName],
+        ["Birth Date:", employee.birthDate],
+        ["Blood Group:", employee.bloodGroup],
+        ["Email:", employee.email],
+        ["Mobile Number:", employee.mobileNumber],
+        ["Emergency Mobile:", employee.emergencyMobileNumber],
+        ["Address:", employee.address],
+      ];
+
+      basicInfo.forEach((info) => {
+        pdf.text(`${info[0]} ${info[1]}`, 15, yPosition);
+        yPosition += 8;
+        if (yPosition > 270) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+      });
+
+      yPosition += 5;
+
+      // Job Information
+      pdf.setFontSize(12);
+      pdf.text("Job Information", 15, yPosition);
+      yPosition += 10;
+
+      pdf.setFontSize(10);
+      const jobInfo = [
+        ["Department:", employee.department],
+        ["Position:", employee.position],
+        ["Joining Date:", employee.joiningDate],
+        ["Salary:", employee.salary],
+        ["Table Number:", employee.tableNumber],
+      ];
+
+      jobInfo.forEach((info) => {
+        pdf.text(`${info[0]} ${info[1]}`, 15, yPosition);
+        yPosition += 8;
+        if (yPosition > 270) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+      });
+
+      yPosition += 5;
+
+      // Banking Details
+      pdf.setFontSize(12);
+      pdf.text("Banking Details", 15, yPosition);
+      yPosition += 10;
+
+      pdf.setFontSize(10);
+      const bankInfo = [
+        ["Account Number:", employee.accountNumber],
+        ["IFSC Code:", employee.ifscCode],
+        ["Aadhaar Number:", employee.aadhaarNumber],
+        ["PAN Number:", employee.panNumber],
+        ["UAN Number:", employee.uanNumber],
+      ];
+
+      bankInfo.forEach((info) => {
+        pdf.text(`${info[0]} ${info[1]}`, 15, yPosition);
+        yPosition += 8;
+        if (yPosition > 270) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+      });
+
+      // Documents Section
+      const documentKeys = [
+        { key: "aadhaarCard", label: "Aadhaar Card" },
+        { key: "panCard", label: "PAN Card" },
+        { key: "passport", label: "Passport" },
+        { key: "drivingLicense", label: "Driving License" },
+        { key: "resume", label: "Resume/CV" },
+        { key: "medicalCertificate", label: "Medical Certificate" },
+        { key: "educationCertificate", label: "Education Certificate" },
+        { key: "experienceLetter", label: "Experience Letter" },
+        { key: "bankPassbook", label: "Bank Passbook" },
+      ];
+
+      yPosition += 10;
+      pdf.setFontSize(12);
+      pdf.text("Documents", 15, yPosition);
+      yPosition += 10;
+
+      // Add document images
+      for (const docType of documentKeys) {
+        const docValue = employee[docType.key as keyof Employee];
+        if (docValue && typeof docValue === "string") {
+          try {
+            pdf.setFontSize(10);
+            pdf.text(`${docType.label}:`, 15, yPosition);
+            yPosition += 8;
+
+            if (docValue.startsWith("data:image")) {
+              pdf.addImage(docValue, "PNG", 20, yPosition, 170, 100);
+              yPosition += 110;
+            } else if (docValue.startsWith("data:application/pdf")) {
+              pdf.text(
+                "[PDF Document - View in original source]",
+                20,
+                yPosition,
+              );
+              yPosition += 8;
+            }
+
+            if (yPosition > 250) {
+              pdf.addPage();
+              yPosition = 20;
+            }
+          } catch (error) {
+            console.error(`Error adding ${docType.label}:`, error);
+          }
+        }
+      }
+
+      // Generate filename with employee name and date
+      const fileName = `${employee.employeeId}_${employee.fullName
+        .replace(/\s+/g, "_")
+        .toLowerCase()}_${new Date().toISOString().split("T")[0]}.pdf`;
+
+      pdf.save(fileName);
+      toast.success("PDF downloaded successfully!");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to generate PDF");
+    }
+  };
+
   if (!employee) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-deep-900 via-blue-deep-800 to-slate-900">
@@ -393,14 +562,41 @@ export default function EmployeeDetailsPage() {
               </p>
             </div>
           </div>
-          <Button
-            onClick={() => navigate("/hr")}
-            variant="outline"
-            className="border-slate-600 text-slate-300 hover:bg-slate-700"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to HR Dashboard
-          </Button>
+          <div className="flex gap-2">
+            {/* 3-dot Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="bg-slate-800 border-slate-700 text-white"
+                align="end"
+              >
+                <DropdownMenuItem
+                  onClick={handleDownloadPDF}
+                  className="focus:bg-slate-700 cursor-pointer"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button
+              onClick={() => navigate("/hr")}
+              variant="outline"
+              className="border-slate-600 text-slate-300 hover:bg-slate-700"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to HR Dashboard
+            </Button>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -547,11 +743,28 @@ export default function EmployeeDetailsPage() {
                     { label: "Father's Name", key: "fatherName", type: "text" },
                     { label: "Mother's Name", key: "motherName", type: "text" },
                     { label: "Birth Date", key: "birthDate", type: "date" },
-                    { label: "Blood Group", key: "bloodGroup", type: "select", options: bloodGroups },
+                    {
+                      label: "Blood Group",
+                      key: "bloodGroup",
+                      type: "select",
+                      options: bloodGroups,
+                    },
                     { label: "Email", key: "email", type: "email" },
-                    { label: "Mobile Number", key: "mobileNumber", type: "tel" },
-                    { label: "Emergency Mobile", key: "emergencyMobileNumber", type: "tel" },
-                    { label: "Alternative Number", key: "alternativeMobileNumber", type: "tel" },
+                    {
+                      label: "Mobile Number",
+                      key: "mobileNumber",
+                      type: "tel",
+                    },
+                    {
+                      label: "Emergency Mobile",
+                      key: "emergencyMobileNumber",
+                      type: "tel",
+                    },
+                    {
+                      label: "Alternative Number",
+                      key: "alternativeMobileNumber",
+                      type: "tel",
+                    },
                   ].map((field) => (
                     <div key={field.key} className="space-y-2">
                       <Label className="text-slate-300">{field.label}</Label>
@@ -559,8 +772,10 @@ export default function EmployeeDetailsPage() {
                         field.type === "select" ? (
                           <Select
                             value={
-                              editForm[field.key as keyof Employee] as string ||
-                              employee[field.key as keyof Employee] as string
+                              (editForm[
+                                field.key as keyof Employee
+                              ] as string) ||
+                              (employee[field.key as keyof Employee] as string)
                             }
                             onValueChange={(value) =>
                               handleEditFormChange(field.key, value)
@@ -581,8 +796,10 @@ export default function EmployeeDetailsPage() {
                           <Input
                             type={field.type}
                             value={
-                              editForm[field.key as keyof Employee] as string ||
-                              employee[field.key as keyof Employee] as string
+                              (editForm[
+                                field.key as keyof Employee
+                              ] as string) ||
+                              (employee[field.key as keyof Employee] as string)
                             }
                             onChange={(e) =>
                               handleEditFormChange(field.key, e.target.value)
@@ -592,7 +809,7 @@ export default function EmployeeDetailsPage() {
                         )
                       ) : (
                         <p className="text-white p-2 bg-slate-800/30 rounded border border-slate-700">
-                          {employee[field.key as keyof Employee] as string ||
+                          {(employee[field.key as keyof Employee] as string) ||
                             "N/A"}
                         </p>
                       )}
@@ -609,8 +826,8 @@ export default function EmployeeDetailsPage() {
                       {isEditing ? (
                         <Textarea
                           value={
-                            editForm[field.key as keyof Employee] as string ||
-                            employee[field.key as keyof Employee] as string
+                            (editForm[field.key as keyof Employee] as string) ||
+                            (employee[field.key as keyof Employee] as string)
                           }
                           onChange={(e) =>
                             handleEditFormChange(field.key, e.target.value)
@@ -619,7 +836,7 @@ export default function EmployeeDetailsPage() {
                         />
                       ) : (
                         <p className="text-white p-2 bg-slate-800/30 rounded border border-slate-700 min-h-[80px]">
-                          {employee[field.key as keyof Employee] as string ||
+                          {(employee[field.key as keyof Employee] as string) ||
                             "N/A"}
                         </p>
                       )}
@@ -638,10 +855,22 @@ export default function EmployeeDetailsPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {[
-                    { label: "Department", key: "department", type: "select", options: departments.map(d => d.name) },
+                    {
+                      label: "Department",
+                      key: "department",
+                      type: "select",
+                      options: departments.map((d) => d.name),
+                    },
                     { label: "Position", key: "position", type: "text" },
                     { label: "Joining Date", key: "joiningDate", type: "date" },
-                    { label: "Table Number", key: "tableNumber", type: "select", options: Array.from({ length: 32 }, (_, i) => String(i + 1)) },
+                    {
+                      label: "Table Number",
+                      key: "tableNumber",
+                      type: "select",
+                      options: Array.from({ length: 32 }, (_, i) =>
+                        String(i + 1),
+                      ),
+                    },
                     { label: "Salary", key: "salary", type: "text" },
                   ].map((field) => (
                     <div key={field.key} className="space-y-2">
@@ -650,8 +879,10 @@ export default function EmployeeDetailsPage() {
                         field.type === "select" ? (
                           <Select
                             value={
-                              editForm[field.key as keyof Employee] as string ||
-                              employee[field.key as keyof Employee] as string
+                              (editForm[
+                                field.key as keyof Employee
+                              ] as string) ||
+                              (employee[field.key as keyof Employee] as string)
                             }
                             onValueChange={(value) =>
                               handleEditFormChange(field.key, value)
@@ -672,8 +903,10 @@ export default function EmployeeDetailsPage() {
                           <Input
                             type={field.type}
                             value={
-                              editForm[field.key as keyof Employee] as string ||
-                              employee[field.key as keyof Employee] as string
+                              (editForm[
+                                field.key as keyof Employee
+                              ] as string) ||
+                              (employee[field.key as keyof Employee] as string)
                             }
                             onChange={(e) =>
                               handleEditFormChange(field.key, e.target.value)
@@ -683,7 +916,7 @@ export default function EmployeeDetailsPage() {
                         )
                       ) : (
                         <p className="text-white p-2 bg-slate-800/30 rounded border border-slate-700">
-                          {employee[field.key as keyof Employee] as string ||
+                          {(employee[field.key as keyof Employee] as string) ||
                             "N/A"}
                         </p>
                       )}
@@ -713,8 +946,8 @@ export default function EmployeeDetailsPage() {
                       {isEditing ? (
                         <Input
                           value={
-                            editForm[field.key as keyof Employee] as string ||
-                            employee[field.key as keyof Employee] as string
+                            (editForm[field.key as keyof Employee] as string) ||
+                            (employee[field.key as keyof Employee] as string)
                           }
                           onChange={(e) =>
                             handleEditFormChange(field.key, e.target.value)
@@ -723,7 +956,7 @@ export default function EmployeeDetailsPage() {
                         />
                       ) : (
                         <p className="text-white p-2 bg-slate-800/30 rounded border border-slate-700">
-                          {employee[field.key as keyof Employee] as string ||
+                          {(employee[field.key as keyof Employee] as string) ||
                             "N/A"}
                         </p>
                       )}
@@ -759,8 +992,7 @@ export default function EmployeeDetailsPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {documentTypes.map((docType) => {
-                    const hasDoc =
-                      employee[docType.key as keyof Employee];
+                    const hasDoc = employee[docType.key as keyof Employee];
                     return (
                       <div
                         key={docType.key}
@@ -852,8 +1084,16 @@ export default function EmployeeDetailsPage() {
                           key: "actualWorkingDays",
                           type: "number",
                         },
-                        { label: "Basic Salary", key: "basicSalary", type: "number" },
-                        { label: "Bonus (Optional)", key: "bonus", type: "number" },
+                        {
+                          label: "Basic Salary",
+                          key: "basicSalary",
+                          type: "number",
+                        },
+                        {
+                          label: "Bonus (Optional)",
+                          key: "bonus",
+                          type: "number",
+                        },
                         {
                           label: "Deductions (Optional)",
                           key: "deductions",
@@ -866,10 +1106,14 @@ export default function EmployeeDetailsPage() {
                         },
                       ].map((field) => (
                         <div key={field.key} className="space-y-2">
-                          <Label className="text-slate-300">{field.label}</Label>
+                          <Label className="text-slate-300">
+                            {field.label}
+                          </Label>
                           <Input
                             type={field.type}
-                            value={salaryForm[field.key as keyof typeof salaryForm]}
+                            value={
+                              salaryForm[field.key as keyof typeof salaryForm]
+                            }
                             onChange={(e) =>
                               setSalaryForm({
                                 ...salaryForm,
@@ -1004,7 +1248,9 @@ export default function EmployeeDetailsPage() {
                             <div>
                               <p className="text-slate-400">Added On</p>
                               <p className="text-white font-medium">
-                                {new Date(record.createdAt).toLocaleDateString()}
+                                {new Date(
+                                  record.createdAt,
+                                ).toLocaleDateString()}
                               </p>
                             </div>
                           </div>
@@ -1075,8 +1321,7 @@ export default function EmployeeDetailsPage() {
                       />
                     ) : documentPreviewModal.documentUrl.startsWith(
                         "data:application/pdf",
-                      ) ||
-                      documentPreviewModal.documentUrl.match(/\.pdf$/i) ? (
+                      ) || documentPreviewModal.documentUrl.match(/\.pdf$/i) ? (
                       <div className="w-full h-full min-h-[500px] bg-slate-800/50 rounded-lg border border-slate-600 flex items-center justify-center">
                         <div className="text-center space-y-4">
                           <FileText className="h-16 w-16 text-slate-400 mx-auto" />
@@ -1089,10 +1334,8 @@ export default function EmployeeDetailsPage() {
                             </p>
                             <Button
                               onClick={() => {
-                                const link =
-                                  document.createElement("a");
-                                link.href =
-                                  documentPreviewModal.documentUrl;
+                                const link = document.createElement("a");
+                                link.href = documentPreviewModal.documentUrl;
                                 link.download = `${documentPreviewModal.documentType}_${documentPreviewModal.employeeName}.pdf`;
                                 link.click();
                               }}
@@ -1117,10 +1360,8 @@ export default function EmployeeDetailsPage() {
                             </p>
                             <Button
                               onClick={() => {
-                                const link =
-                                  document.createElement("a");
-                                link.href =
-                                  documentPreviewModal.documentUrl;
+                                const link = document.createElement("a");
+                                link.href = documentPreviewModal.documentUrl;
                                 link.download = `${documentPreviewModal.documentType}_${documentPreviewModal.employeeName}`;
                                 link.click();
                               }}
