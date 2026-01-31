@@ -178,6 +178,16 @@ export default function AppNav() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+
+                {/* Logout Button */}
+                <Button
+                  onClick={handleLogout}
+                  className="bg-red-500 hover:bg-red-600 text-white transition-all duration-300"
+                  size="sm"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
               </>
             ) : (
               /* Login Button for non-authenticated users */
