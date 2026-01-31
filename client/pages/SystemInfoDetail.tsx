@@ -31,6 +31,7 @@ import {
   Camera,
   Monitor,
   Phone,
+  Trash2,
   type LucideIcon,
 } from "lucide-react";
 import {
