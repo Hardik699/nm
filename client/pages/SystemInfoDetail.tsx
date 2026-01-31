@@ -222,6 +222,55 @@ export default function SystemInfoDetail() {
     setShowForm(true);
   };
 
+  const handleViewAsset = (asset: Asset) => {
+    setSelectedAsset(asset);
+    setIsEditing(false);
+    setEditForm(null);
+  };
+
+  const handleEditAsset = () => {
+    if (selectedAsset) {
+      setEditForm({ ...selectedAsset });
+      setIsEditing(true);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editForm || !selectedAsset) return;
+    try {
+      await systemAssetsApi.update(selectedAsset.id, editForm);
+      const updatedAssets = await systemAssetsApi.getAll();
+      setAssets(updatedAssets);
+      setSelectedAsset(editForm);
+      setIsEditing(false);
+      toast.success("Asset updated successfully!");
+    } catch (error) {
+      console.error("Error updating asset:", error);
+      toast.error("Failed to update asset");
+    }
+  };
+
+  const handleDeleteAsset = async () => {
+    if (!selectedAsset) return;
+    // Simple password check (in production, this should be more secure)
+    if (deletePassword !== "1") {
+      toast.error("Incorrect password!");
+      return;
+    }
+    try {
+      await systemAssetsApi.delete(selectedAsset.id);
+      const updatedAssets = await systemAssetsApi.getAll();
+      setAssets(updatedAssets);
+      setSelectedAsset(null);
+      setShowDeleteModal(false);
+      setDeletePassword("");
+      toast.success("Asset deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting asset:", error);
+      toast.error("Failed to delete asset");
+    }
+  };
+
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isVonage) {
