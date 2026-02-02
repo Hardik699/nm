@@ -263,7 +263,7 @@ export default function EmployeeDetailsPage() {
     }
   };
 
-  const handleSaveEmployee = () => {
+  const handleSaveEmployee = async () => {
     if (!employee) return;
 
     const pendingTable =
@@ -292,18 +292,26 @@ export default function EmployeeDetailsPage() {
       }
     }
 
-    const employees = JSON.parse(
-      localStorage.getItem("hrEmployees") || "[]",
-    ) as Employee[];
-    const updatedEmployees = employees.map((emp) =>
-      emp.id === employee.id ? { ...emp, ...editForm } : emp,
-    );
+    try {
+      const updatedEmployee = { ...employee, ...editForm };
 
-    setEmployee({ ...employee, ...editForm });
-    localStorage.setItem("hrEmployees", JSON.stringify(updatedEmployees));
-    setIsEditing(false);
-    setEditForm({});
-    toast.success("Employee information updated successfully!");
+      // Save to API
+      if (employee._id) {
+        await fetch(`/api/employees/${employee._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedEmployee),
+        });
+      }
+
+      setEmployee(updatedEmployee);
+      setIsEditing(false);
+      setEditForm({});
+      toast.success("Employee information updated successfully!");
+    } catch (error) {
+      console.error("Failed to save employee:", error);
+      toast.error("Failed to save employee information");
+    }
   };
 
   const handleAddSalaryRecord = () => {
