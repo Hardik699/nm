@@ -105,9 +105,23 @@ export default function SystemInfo() {
     useState(false);
 
   useEffect(() => {
-    const existing = localStorage.getItem(STORAGE_KEY);
-    const assets = existing ? JSON.parse(existing) : [];
-    setAssetCount(assets.length);
+    const fetchAssets = async () => {
+      try {
+        const response = await fetch("/api/system-assets");
+        const result = await response.json();
+        if (result.success) {
+          setAssetCount(result.data.length);
+        }
+      } catch (error) {
+        console.error("Failed to fetch assets:", error);
+        // Fall back to localStorage if API fails
+        const existing = localStorage.getItem(STORAGE_KEY);
+        const assets = existing ? JSON.parse(existing) : [];
+        setAssetCount(assets.length);
+      }
+    };
+
+    fetchAssets();
 
     // Check Google Apps Script configuration
     const configured = googleAppsScriptSync.isReady();
