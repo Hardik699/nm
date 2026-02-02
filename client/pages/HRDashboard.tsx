@@ -320,9 +320,27 @@ export default function HRDashboard() {
     null,
   );
 
-  const saveAttendanceRecords = (updated: AttendanceRecord[]) => {
+  const saveAttendanceRecords = async (updated: AttendanceRecord[]) => {
     setAttendanceRecords(updated);
-    localStorage.setItem("attendanceRecords", JSON.stringify(updated));
+    try {
+      for (const record of updated) {
+        if (record._id) {
+          await fetch(`/api/attendance/${record._id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(record),
+          });
+        } else {
+          await fetch("/api/attendance", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(record),
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to save attendance records:", error);
+    }
   };
 
   // Document preview modal state
