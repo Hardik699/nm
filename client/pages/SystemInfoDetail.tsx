@@ -172,8 +172,22 @@ export default function SystemInfoDetail() {
   });
 
   useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    setAssets(raw ? JSON.parse(raw) : []);
+    const fetchAssets = async () => {
+      try {
+        const response = await fetch("/api/system-assets");
+        const result = await response.json();
+        if (result.success) {
+          setAssets(result.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch assets:", error);
+        // Fall back to localStorage if API fails
+        const raw = localStorage.getItem(STORAGE_KEY);
+        setAssets(raw ? JSON.parse(raw) : []);
+      }
+    };
+
+    fetchAssets();
   }, []);
 
   const filtered = useMemo(
