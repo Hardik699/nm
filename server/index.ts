@@ -62,6 +62,7 @@ export function createServer() {
   app.use("/api/attendance", attendanceRouter);
   app.use("/api/leave-requests", leaveRequestsRouter);
   app.use("/api/salary-records", salaryRecordsRouter);
+  app.use("/api/system-assets", systemAssetsRouter);
 
   return app;
 }
