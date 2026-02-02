@@ -128,15 +128,29 @@ export default function SystemInfo() {
     setIsGoogleSheetsConfigured(configured);
   }, []);
 
-  const handleLoadDemo = () => {
-    const newAssets = loadDemoData();
-    if (newAssets.length > 0) {
-      setAssetCount((prev) => prev + newAssets.length);
-      alert(
-        `Loaded ${newAssets.length} demo system assets including mouse, keyboard, and other components!`,
-      );
-    } else {
-      alert("Demo data already exists in the system.");
+  const handleLoadDemo = async () => {
+    try {
+      const newAssets = loadDemoData();
+      if (newAssets.length > 0) {
+        const response = await fetch("/api/system-assets/bulk/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newAssets),
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          setAssetCount((prev) => prev + result.data.length);
+          alert(
+            `Loaded ${result.data.length} demo system assets including mouse, keyboard, and other components!`,
+          );
+        } else {
+          alert("Demo data already exists in the system.");
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load demo data:", error);
+      alert("Error loading demo data. Please try again.");
     }
   };
 
