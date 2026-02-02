@@ -159,34 +159,77 @@ export default function EmployeeDetailsPage() {
   });
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
-    const role = localStorage.getItem("userRole");
+    const loadData = async () => {
+      const isAuthenticated = localStorage.getItem("isAuthenticated");
+      const role = localStorage.getItem("userRole");
 
-    if (!isAuthenticated || (role !== "admin" && role !== "hr")) {
-      navigate("/login");
-      return;
-    }
-
-    // Load employee data
-    const employees = JSON.parse(
-      localStorage.getItem("hrEmployees") || "[]",
-    ) as Employee[];
-    const dept = JSON.parse(localStorage.getItem("departments") || "[]") as Department[];
-    const salary = JSON.parse(
-      localStorage.getItem("salaryRecords") || "[]",
-    ) as SalaryRecord[];
-
-    setDepartments(dept);
-    setSalaryRecords(salary);
-
-    if (employeeId) {
-      const found = employees.find((e) => e.id === employeeId);
-      if (found) {
-        setEmployee(found);
-      } else {
-        navigate("/hr");
+      if (!isAuthenticated || (role !== "admin" && role !== "hr")) {
+        navigate("/login");
+        return;
       }
-    }
+
+      try {
+        // Load employee data from API
+        const [empRes, deptRes, salaryRes] = await Promise.all([
+          fetch("/api/employees"),
+          fetch("/api/departments"),
+          fetch("/api/salary-records"),
+        ]);
+
+        let employees: Employee[] = [];
+        let dept: Department[] = [];
+        let salary: SalaryRecord[] = [];
+
+        if (empRes.ok) {
+          const empData = await empRes.json();
+          if (empData.success) employees = empData.data;
+        }
+        if (deptRes.ok) {
+          const deptData = await deptRes.json();
+          if (deptData.success) dept = deptData.data;
+        }
+        if (salaryRes.ok) {
+          const salaryData = await salaryRes.json();
+          if (salaryData.success) salary = salaryData.data;
+        }
+
+        setDepartments(dept);
+        setSalaryRecords(salary);
+
+        if (employeeId) {
+          const found = employees.find((e) => e.id === employeeId);
+          if (found) {
+            setEmployee(found);
+          } else {
+            navigate("/hr");
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load employee details:", error);
+        // Fall back to localStorage
+        const employees = JSON.parse(
+          localStorage.getItem("hrEmployees") || "[]",
+        ) as Employee[];
+        const dept = JSON.parse(localStorage.getItem("departments") || "[]") as Department[];
+        const salary = JSON.parse(
+          localStorage.getItem("salaryRecords") || "[]",
+        ) as SalaryRecord[];
+
+        setDepartments(dept);
+        setSalaryRecords(salary);
+
+        if (employeeId) {
+          const found = employees.find((e) => e.id === employeeId);
+          if (found) {
+            setEmployee(found);
+          } else {
+            navigate("/hr");
+          }
+        }
+      }
+    };
+
+    loadData();
   }, [employeeId, navigate]);
 
   const handleStartEdit = () => {
