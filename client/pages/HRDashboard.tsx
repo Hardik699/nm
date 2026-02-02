@@ -823,7 +823,7 @@ export default function HRDashboard() {
   };
 
   // Handle employee deletion
-  const handleDeleteEmployee = (employeeId: string) => {
+  const handleDeleteEmployee = async (employeeId: string) => {
     const employee = employees.find((emp) => emp.id === employeeId);
     if (!employee) return;
 
@@ -832,16 +832,25 @@ export default function HRDashboard() {
         `Are you sure you want to delete employee "${employee.fullName}"?`,
       )
     ) {
-      const updatedEmployees = employees.filter((emp) => emp.id !== employeeId);
-      saveEmployees(updatedEmployees);
+      try {
+        // Delete from API
+        if (employee._id) {
+          await fetch(`/api/employees/${employee._id}`, { method: "DELETE" });
+        }
 
-      // Update department employee count
-      const updatedDepartments = departments.map((dept) =>
-        dept.name === employee.department
-          ? { ...dept, employeeCount: Math.max(0, dept.employeeCount - 1) }
-          : dept,
-      );
-      saveDepartments(updatedDepartments);
+        const updatedEmployees = employees.filter((emp) => emp.id !== employeeId);
+        setEmployees(updatedEmployees);
+
+        // Update department employee count
+        const updatedDepartments = departments.map((dept) =>
+          dept.name === employee.department
+            ? { ...dept, employeeCount: Math.max(0, dept.employeeCount - 1) }
+            : dept,
+        );
+        await saveDepartments(updatedDepartments);
+      } catch (error) {
+        console.error("Failed to delete employee:", error);
+      }
     }
   };
 
