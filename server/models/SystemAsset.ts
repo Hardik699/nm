@@ -38,7 +38,7 @@ const systemAssetSchema = new Schema<ISystemAsset>(
     storageType: String,
     storageCapacity: String,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const SystemAsset =

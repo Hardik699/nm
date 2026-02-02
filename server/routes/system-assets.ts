@@ -66,9 +66,7 @@ const getAssetById: RequestHandler = async (req, res) => {
     res.status(500).json({
       success: false,
       error:
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch system asset",
+        error instanceof Error ? error.message : "Failed to fetch system asset",
     });
   }
 };

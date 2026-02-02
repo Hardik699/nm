@@ -76,7 +76,11 @@ import {
 import { toast } from "sonner";
 import { uploadBase64ToSupabase } from "@/lib/supabase";
 import AppNav from "@/components/Navigation";
-import { exportToCSV, exportToExcel, exportDepartmentSummary } from "@/lib/export";
+import {
+  exportToCSV,
+  exportToExcel,
+  exportDepartmentSummary,
+} from "@/lib/export";
 
 interface SalaryRecord {
   id: string;
@@ -381,13 +385,14 @@ export default function HRDashboard() {
     const loadData = async () => {
       if (userRole === "admin" || userRole === "hr") {
         try {
-          const [empRes, deptRes, leaveRes, salaryRes, attRes] = await Promise.all([
-            fetch("/api/employees"),
-            fetch("/api/departments"),
-            fetch("/api/leave-requests"),
-            fetch("/api/salary-records"),
-            fetch("/api/attendance"),
-          ]);
+          const [empRes, deptRes, leaveRes, salaryRes, attRes] =
+            await Promise.all([
+              fetch("/api/employees"),
+              fetch("/api/departments"),
+              fetch("/api/leave-requests"),
+              fetch("/api/salary-records"),
+              fetch("/api/attendance"),
+            ]);
 
           if (empRes.ok) {
             const empData = await empRes.json();
@@ -621,11 +626,11 @@ export default function HRDashboard() {
     ) {
       alert(
         "Please fill in all required fields:\n\n" +
-        "Personal: Full Name, Birth Date, Mobile Number, Current Address, Aadhaar Number, PAN Number\n" +
-        "Job: Department, Joining Date, Table Number\n" +
-        "Banking: Account Number, IFSC Code\n" +
-        "Contact: Email\n\n" +
-        "For UAN Number: Either provide the number OR check 'Skip UAN' and provide a reason",
+          "Personal: Full Name, Birth Date, Mobile Number, Current Address, Aadhaar Number, PAN Number\n" +
+          "Job: Department, Joining Date, Table Number\n" +
+          "Banking: Account Number, IFSC Code\n" +
+          "Contact: Email\n\n" +
+          "For UAN Number: Either provide the number OR check 'Skip UAN' and provide a reason",
       );
       return;
     }
@@ -838,7 +843,9 @@ export default function HRDashboard() {
           await fetch(`/api/employees/${employee._id}`, { method: "DELETE" });
         }
 
-        const updatedEmployees = employees.filter((emp) => emp.id !== employeeId);
+        const updatedEmployees = employees.filter(
+          (emp) => emp.id !== employeeId,
+        );
         setEmployees(updatedEmployees);
 
         // Update department employee count
@@ -911,7 +918,9 @@ export default function HRDashboard() {
       !deactivationModal.resignationLetter ||
       !deactivationModal.dateOfExit
     ) {
-      alert("Please provide a reason, upload resignation letter, and select date of exit");
+      alert(
+        "Please provide a reason, upload resignation letter, and select date of exit",
+      );
       return;
     }
 
@@ -1464,7 +1473,11 @@ Generated on: ${new Date().toLocaleString()}
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-5 bg-slate-800/50 border border-slate-700">
             <TabsTrigger
               value="employees"
@@ -1694,7 +1707,8 @@ Generated on: ${new Date().toLocaleString()}
 
                         <div className="space-y-2">
                           <Label htmlFor="mobile" className="text-slate-300">
-                            Mobile Number <span className="text-red-400">*</span>
+                            Mobile Number{" "}
+                            <span className="text-red-400">*</span>
                           </Label>
                           <Input
                             id="mobile"
@@ -1757,7 +1771,8 @@ Generated on: ${new Date().toLocaleString()}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="address" className="text-slate-300">
-                            Current Address <span className="text-red-400">*</span>
+                            Current Address{" "}
+                            <span className="text-red-400">*</span>
                           </Label>
                           <Textarea
                             id="address"
@@ -1926,7 +1941,8 @@ Generated on: ${new Date().toLocaleString()}
                             htmlFor="account-number"
                             className="text-slate-300"
                           >
-                            Account Number <span className="text-red-400">*</span>
+                            Account Number{" "}
+                            <span className="text-red-400">*</span>
                           </Label>
                           <Input
                             id="account-number"
@@ -1985,7 +2001,8 @@ Generated on: ${new Date().toLocaleString()}
                             htmlFor="aadhaar-number"
                             className="text-slate-300"
                           >
-                            Aadhaar Number <span className="text-red-400">*</span>
+                            Aadhaar Number{" "}
+                            <span className="text-red-400">*</span>
                           </Label>
                           <Input
                             id="aadhaar-number"
@@ -2062,19 +2079,28 @@ Generated on: ${new Date().toLocaleString()}
                               }}
                               className="w-4 h-4 rounded border-slate-600 text-blue-500 cursor-pointer"
                             />
-                            <label htmlFor="skip-uan" className="text-sm text-slate-400 cursor-pointer">
+                            <label
+                              htmlFor="skip-uan"
+                              className="text-sm text-slate-400 cursor-pointer"
+                            >
                               Skip UAN (provide reason)
                             </label>
                           </div>
                           {isUanSkipped && (
                             <div className="mt-2 space-y-2">
-                              <Label htmlFor="uan-skip-reason" className="text-slate-300">
-                                Reason for skipping <span className="text-red-400">*</span>
+                              <Label
+                                htmlFor="uan-skip-reason"
+                                className="text-slate-300"
+                              >
+                                Reason for skipping{" "}
+                                <span className="text-red-400">*</span>
                               </Label>
                               <Textarea
                                 id="uan-skip-reason"
                                 value={uanSkipReason}
-                                onChange={(e) => setUanSkipReason(e.target.value)}
+                                onChange={(e) =>
+                                  setUanSkipReason(e.target.value)
+                                }
                                 placeholder="e.g., Employee is a contractor, Under processing, Not applicable..."
                                 className="bg-slate-800/50 border-slate-700 text-white h-16"
                               />
@@ -2358,7 +2384,11 @@ Generated on: ${new Date().toLocaleString()}
                         <DropdownMenuContent className="bg-slate-800 border-slate-700">
                           <DropdownMenuItem
                             onClick={() =>
-                              exportToCSV(employees, departments, `hr-employees-${new Date().toISOString().split('T')[0]}.csv`)
+                              exportToCSV(
+                                employees,
+                                departments,
+                                `hr-employees-${new Date().toISOString().split("T")[0]}.csv`,
+                              )
                             }
                             className="text-slate-300 focus:bg-slate-700 cursor-pointer"
                           >
@@ -2367,7 +2397,11 @@ Generated on: ${new Date().toLocaleString()}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() =>
-                              exportToExcel(employees, departments, `hr-employees-${new Date().toISOString().split('T')[0]}.xlsx`)
+                              exportToExcel(
+                                employees,
+                                departments,
+                                `hr-employees-${new Date().toISOString().split("T")[0]}.xlsx`,
+                              )
                             }
                             className="text-slate-300 focus:bg-slate-700 cursor-pointer"
                           >
@@ -2376,7 +2410,11 @@ Generated on: ${new Date().toLocaleString()}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() =>
-                              exportDepartmentSummary(employees, departments, `department-summary-${new Date().toISOString().split('T')[0]}.csv`)
+                              exportDepartmentSummary(
+                                employees,
+                                departments,
+                                `department-summary-${new Date().toISOString().split("T")[0]}.csv`,
+                              )
                             }
                             className="text-slate-300 focus:bg-slate-700 cursor-pointer"
                           >
@@ -3091,9 +3129,7 @@ Generated on: ${new Date().toLocaleString()}
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-slate-300">
-                    Date of Exit *
-                  </Label>
+                  <Label className="text-slate-300">Date of Exit *</Label>
                   <Input
                     type="date"
                     value={deactivationModal.dateOfExit}
@@ -3113,8 +3149,8 @@ Generated on: ${new Date().toLocaleString()}
                     <span className="font-medium">⚠️ Important:</span>
                   </div>
                   <p className="text-yellow-300 text-sm mt-1">
-                    Reason, resignation letter, and date of exit are mandatory for
-                    employee deactivation.
+                    Reason, resignation letter, and date of exit are mandatory
+                    for employee deactivation.
                   </p>
                 </div>
 
@@ -3916,7 +3952,7 @@ Generated on: ${new Date().toLocaleString()}
                                       try {
                                         // Show loading toast
                                         const toastId = toast.loading(
-                                          `Uploading ${docType.label}...`
+                                          `Uploading ${docType.label}...`,
                                         );
 
                                         // Read file as base64
@@ -3930,13 +3966,13 @@ Generated on: ${new Date().toLocaleString()}
                                               await uploadBase64ToSupabase(
                                                 base64Data,
                                                 `documents/${employeeDetailModal.employee?.id}/${docType.key}`,
-                                                file.name
+                                                file.name,
                                               );
 
                                             // Store URL instead of base64
                                             handleEditFormChange(
                                               docType.key,
-                                              supabaseUrl
+                                              supabaseUrl,
                                             );
 
                                             // Update toast to success
@@ -3946,18 +3982,19 @@ Generated on: ${new Date().toLocaleString()}
                                                 id: toastId,
                                                 description: `${file.name} - ${(file.size / 1024).toFixed(2)} KB`,
                                                 duration: 3000,
-                                              }
+                                              },
                                             );
                                           } catch (error) {
                                             toast.error(
                                               `Failed to upload ${docType.label}`,
                                               {
                                                 id: toastId,
-                                                description: error instanceof Error
-                                                  ? error.message
-                                                  : "Unknown error",
+                                                description:
+                                                  error instanceof Error
+                                                    ? error.message
+                                                    : "Unknown error",
                                                 duration: 4000,
-                                              }
+                                              },
                                             );
                                           }
                                         };
@@ -3966,11 +4003,12 @@ Generated on: ${new Date().toLocaleString()}
                                         toast.error(
                                           `Failed to upload ${docType.label}`,
                                           {
-                                            description: error instanceof Error
-                                              ? error.message
-                                              : "Unknown error",
+                                            description:
+                                              error instanceof Error
+                                                ? error.message
+                                                : "Unknown error",
                                             duration: 4000,
-                                          }
+                                          },
                                         );
                                       }
                                     }

@@ -210,7 +210,9 @@ export default function EmployeeDetailsPage() {
         const employees = JSON.parse(
           localStorage.getItem("hrEmployees") || "[]",
         ) as Employee[];
-        const dept = JSON.parse(localStorage.getItem("departments") || "[]") as Department[];
+        const dept = JSON.parse(
+          localStorage.getItem("departments") || "[]",
+        ) as Department[];
         const salary = JSON.parse(
           localStorage.getItem("salaryRecords") || "[]",
         ) as SalaryRecord[];
@@ -277,9 +279,7 @@ export default function EmployeeDetailsPage() {
         employees
           .filter(
             (e) =>
-              e.status === "active" &&
-              e.id !== employee.id &&
-              e.tableNumber,
+              e.status === "active" && e.id !== employee.id && e.tableNumber,
           )
           .map((e) => parseInt(e.tableNumber, 10))
           .filter((x) => !Number.isNaN(x)),
@@ -610,11 +610,28 @@ export default function EmployeeDetailsPage() {
                     { label: "Father's Name", key: "fatherName", type: "text" },
                     { label: "Mother's Name", key: "motherName", type: "text" },
                     { label: "Birth Date", key: "birthDate", type: "date" },
-                    { label: "Blood Group", key: "bloodGroup", type: "select", options: bloodGroups },
+                    {
+                      label: "Blood Group",
+                      key: "bloodGroup",
+                      type: "select",
+                      options: bloodGroups,
+                    },
                     { label: "Email", key: "email", type: "email" },
-                    { label: "Mobile Number", key: "mobileNumber", type: "tel" },
-                    { label: "Emergency Mobile", key: "emergencyMobileNumber", type: "tel" },
-                    { label: "Alternative Number", key: "alternativeMobileNumber", type: "tel" },
+                    {
+                      label: "Mobile Number",
+                      key: "mobileNumber",
+                      type: "tel",
+                    },
+                    {
+                      label: "Emergency Mobile",
+                      key: "emergencyMobileNumber",
+                      type: "tel",
+                    },
+                    {
+                      label: "Alternative Number",
+                      key: "alternativeMobileNumber",
+                      type: "tel",
+                    },
                   ].map((field) => (
                     <div key={field.key} className="space-y-2">
                       <Label className="text-slate-300">{field.label}</Label>
@@ -622,8 +639,10 @@ export default function EmployeeDetailsPage() {
                         field.type === "select" ? (
                           <Select
                             value={
-                              editForm[field.key as keyof Employee] as string ||
-                              employee[field.key as keyof Employee] as string
+                              (editForm[
+                                field.key as keyof Employee
+                              ] as string) ||
+                              (employee[field.key as keyof Employee] as string)
                             }
                             onValueChange={(value) =>
                               handleEditFormChange(field.key, value)
@@ -644,8 +663,10 @@ export default function EmployeeDetailsPage() {
                           <Input
                             type={field.type}
                             value={
-                              editForm[field.key as keyof Employee] as string ||
-                              employee[field.key as keyof Employee] as string
+                              (editForm[
+                                field.key as keyof Employee
+                              ] as string) ||
+                              (employee[field.key as keyof Employee] as string)
                             }
                             onChange={(e) =>
                               handleEditFormChange(field.key, e.target.value)
@@ -655,7 +676,7 @@ export default function EmployeeDetailsPage() {
                         )
                       ) : (
                         <p className="text-white p-2 bg-slate-800/30 rounded border border-slate-700">
-                          {employee[field.key as keyof Employee] as string ||
+                          {(employee[field.key as keyof Employee] as string) ||
                             "N/A"}
                         </p>
                       )}
@@ -672,8 +693,8 @@ export default function EmployeeDetailsPage() {
                       {isEditing ? (
                         <Textarea
                           value={
-                            editForm[field.key as keyof Employee] as string ||
-                            employee[field.key as keyof Employee] as string
+                            (editForm[field.key as keyof Employee] as string) ||
+                            (employee[field.key as keyof Employee] as string)
                           }
                           onChange={(e) =>
                             handleEditFormChange(field.key, e.target.value)
@@ -682,7 +703,7 @@ export default function EmployeeDetailsPage() {
                         />
                       ) : (
                         <p className="text-white p-2 bg-slate-800/30 rounded border border-slate-700 min-h-[80px]">
-                          {employee[field.key as keyof Employee] as string ||
+                          {(employee[field.key as keyof Employee] as string) ||
                             "N/A"}
                         </p>
                       )}
@@ -701,10 +722,22 @@ export default function EmployeeDetailsPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {[
-                    { label: "Department", key: "department", type: "select", options: departments.map(d => d.name) },
+                    {
+                      label: "Department",
+                      key: "department",
+                      type: "select",
+                      options: departments.map((d) => d.name),
+                    },
                     { label: "Position", key: "position", type: "text" },
                     { label: "Joining Date", key: "joiningDate", type: "date" },
-                    { label: "Table Number", key: "tableNumber", type: "select", options: Array.from({ length: 32 }, (_, i) => String(i + 1)) },
+                    {
+                      label: "Table Number",
+                      key: "tableNumber",
+                      type: "select",
+                      options: Array.from({ length: 32 }, (_, i) =>
+                        String(i + 1),
+                      ),
+                    },
                     { label: "Salary", key: "salary", type: "text" },
                   ].map((field) => (
                     <div key={field.key} className="space-y-2">
@@ -713,8 +746,10 @@ export default function EmployeeDetailsPage() {
                         field.type === "select" ? (
                           <Select
                             value={
-                              editForm[field.key as keyof Employee] as string ||
-                              employee[field.key as keyof Employee] as string
+                              (editForm[
+                                field.key as keyof Employee
+                              ] as string) ||
+                              (employee[field.key as keyof Employee] as string)
                             }
                             onValueChange={(value) =>
                               handleEditFormChange(field.key, value)
@@ -735,8 +770,10 @@ export default function EmployeeDetailsPage() {
                           <Input
                             type={field.type}
                             value={
-                              editForm[field.key as keyof Employee] as string ||
-                              employee[field.key as keyof Employee] as string
+                              (editForm[
+                                field.key as keyof Employee
+                              ] as string) ||
+                              (employee[field.key as keyof Employee] as string)
                             }
                             onChange={(e) =>
                               handleEditFormChange(field.key, e.target.value)
@@ -746,7 +783,7 @@ export default function EmployeeDetailsPage() {
                         )
                       ) : (
                         <p className="text-white p-2 bg-slate-800/30 rounded border border-slate-700">
-                          {employee[field.key as keyof Employee] as string ||
+                          {(employee[field.key as keyof Employee] as string) ||
                             "N/A"}
                         </p>
                       )}
@@ -776,8 +813,8 @@ export default function EmployeeDetailsPage() {
                       {isEditing ? (
                         <Input
                           value={
-                            editForm[field.key as keyof Employee] as string ||
-                            employee[field.key as keyof Employee] as string
+                            (editForm[field.key as keyof Employee] as string) ||
+                            (employee[field.key as keyof Employee] as string)
                           }
                           onChange={(e) =>
                             handleEditFormChange(field.key, e.target.value)
@@ -786,7 +823,7 @@ export default function EmployeeDetailsPage() {
                         />
                       ) : (
                         <p className="text-white p-2 bg-slate-800/30 rounded border border-slate-700">
-                          {employee[field.key as keyof Employee] as string ||
+                          {(employee[field.key as keyof Employee] as string) ||
                             "N/A"}
                         </p>
                       )}
@@ -822,8 +859,7 @@ export default function EmployeeDetailsPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {documentTypes.map((docType) => {
-                    const hasDoc =
-                      employee[docType.key as keyof Employee];
+                    const hasDoc = employee[docType.key as keyof Employee];
                     return (
                       <div
                         key={docType.key}
@@ -915,8 +951,16 @@ export default function EmployeeDetailsPage() {
                           key: "actualWorkingDays",
                           type: "number",
                         },
-                        { label: "Basic Salary", key: "basicSalary", type: "number" },
-                        { label: "Bonus (Optional)", key: "bonus", type: "number" },
+                        {
+                          label: "Basic Salary",
+                          key: "basicSalary",
+                          type: "number",
+                        },
+                        {
+                          label: "Bonus (Optional)",
+                          key: "bonus",
+                          type: "number",
+                        },
                         {
                           label: "Deductions (Optional)",
                           key: "deductions",
@@ -929,10 +973,14 @@ export default function EmployeeDetailsPage() {
                         },
                       ].map((field) => (
                         <div key={field.key} className="space-y-2">
-                          <Label className="text-slate-300">{field.label}</Label>
+                          <Label className="text-slate-300">
+                            {field.label}
+                          </Label>
                           <Input
                             type={field.type}
-                            value={salaryForm[field.key as keyof typeof salaryForm]}
+                            value={
+                              salaryForm[field.key as keyof typeof salaryForm]
+                            }
                             onChange={(e) =>
                               setSalaryForm({
                                 ...salaryForm,
@@ -1067,7 +1115,9 @@ export default function EmployeeDetailsPage() {
                             <div>
                               <p className="text-slate-400">Added On</p>
                               <p className="text-white font-medium">
-                                {new Date(record.createdAt).toLocaleDateString()}
+                                {new Date(
+                                  record.createdAt,
+                                ).toLocaleDateString()}
                               </p>
                             </div>
                           </div>
@@ -1138,8 +1188,7 @@ export default function EmployeeDetailsPage() {
                       />
                     ) : documentPreviewModal.documentUrl.startsWith(
                         "data:application/pdf",
-                      ) ||
-                      documentPreviewModal.documentUrl.match(/\.pdf$/i) ? (
+                      ) || documentPreviewModal.documentUrl.match(/\.pdf$/i) ? (
                       <div className="w-full h-full min-h-[500px] bg-slate-800/50 rounded-lg border border-slate-600 flex items-center justify-center">
                         <div className="text-center space-y-4">
                           <FileText className="h-16 w-16 text-slate-400 mx-auto" />
@@ -1152,10 +1201,8 @@ export default function EmployeeDetailsPage() {
                             </p>
                             <Button
                               onClick={() => {
-                                const link =
-                                  document.createElement("a");
-                                link.href =
-                                  documentPreviewModal.documentUrl;
+                                const link = document.createElement("a");
+                                link.href = documentPreviewModal.documentUrl;
                                 link.download = `${documentPreviewModal.documentType}_${documentPreviewModal.employeeName}.pdf`;
                                 link.click();
                               }}
@@ -1180,10 +1227,8 @@ export default function EmployeeDetailsPage() {
                             </p>
                             <Button
                               onClick={() => {
-                                const link =
-                                  document.createElement("a");
-                                link.href =
-                                  documentPreviewModal.documentUrl;
+                                const link = document.createElement("a");
+                                link.href = documentPreviewModal.documentUrl;
                                 link.download = `${documentPreviewModal.documentType}_${documentPreviewModal.employeeName}`;
                                 link.click();
                               }}
