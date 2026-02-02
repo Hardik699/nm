@@ -314,7 +314,7 @@ export default function EmployeeDetailsPage() {
     }
   };
 
-  const handleAddSalaryRecord = () => {
+  const handleAddSalaryRecord = async () => {
     if (
       !employee ||
       !salaryForm.month ||
@@ -359,9 +359,21 @@ export default function EmployeeDetailsPage() {
       createdAt: new Date().toISOString(),
     };
 
-    const updatedRecords = [...salaryRecords, newRecord];
-    setSalaryRecords(updatedRecords);
-    localStorage.setItem("salaryRecords", JSON.stringify(updatedRecords));
+    try {
+      // Save to API
+      await fetch("/api/salary-records", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newRecord),
+      });
+
+      const updatedRecords = [...salaryRecords, newRecord];
+      setSalaryRecords(updatedRecords);
+    } catch (error) {
+      console.error("Failed to save salary record:", error);
+      alert("Failed to save salary record");
+      return;
+    }
 
     setSalaryForm({
       month: "",
