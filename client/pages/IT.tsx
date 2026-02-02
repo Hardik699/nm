@@ -70,16 +70,43 @@ export default function ITPage() {
 
   // Load local data
   useEffect(() => {
-    setUserRole(localStorage.getItem("userRole") || "");
-    const emps = localStorage.getItem("hrEmployees");
-    const depts = localStorage.getItem("departments");
-    const its = localStorage.getItem("itAccounts");
-    if (emps) setEmployees(JSON.parse(emps));
-    if (depts) setDepartments(JSON.parse(depts));
-    if (its) setRecords(JSON.parse(its));
+    const loadData = async () => {
+      setUserRole(localStorage.getItem("userRole") || "");
+      try {
+        const [empRes, deptRes, itsRes] = await Promise.all([
+          fetch("/api/employees"),
+          fetch("/api/departments"),
+          fetch("/api/it-accounts"),
+        ]);
 
-    // Load available PC/Laptop IDs
-    loadAvailableSystemIds();
+        if (empRes.ok) {
+          const empData = await empRes.json();
+          if (empData.success) setEmployees(empData.data);
+        }
+        if (deptRes.ok) {
+          const deptData = await deptRes.json();
+          if (deptData.success) setDepartments(deptData.data);
+        }
+        if (itsRes.ok) {
+          const itsData = await itsRes.json();
+          if (itsData.success) setRecords(itsData.data);
+        }
+      } catch (error) {
+        console.error("Failed to load IT data:", error);
+        // Fall back to localStorage if API fails
+        const emps = localStorage.getItem("hrEmployees");
+        const depts = localStorage.getItem("departments");
+        const its = localStorage.getItem("itAccounts");
+        if (emps) setEmployees(JSON.parse(emps));
+        if (depts) setDepartments(JSON.parse(depts));
+        if (its) setRecords(JSON.parse(its));
+      }
+
+      // Load available PC/Laptop IDs
+      loadAvailableSystemIds();
+    };
+
+    loadData();
   }, []);
 
   // Handle URL parameters after employees are loaded
