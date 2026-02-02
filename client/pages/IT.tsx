@@ -249,9 +249,27 @@ export default function ITPage() {
     }
   };
 
-  const saveRecords = (next: ITRecord[]) => {
+  const saveRecords = async (next: ITRecord[]) => {
     setRecords(next);
-    localStorage.setItem("itAccounts", JSON.stringify(next));
+    try {
+      for (const record of next) {
+        if (record._id) {
+          await fetch(`/api/it-accounts/${record._id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(record),
+          });
+        } else {
+          await fetch("/api/it-accounts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(record),
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to save IT accounts:", error);
+    }
 
     // Refresh available system IDs after saving
     loadAvailableSystemIds();
