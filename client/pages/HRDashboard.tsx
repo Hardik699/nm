@@ -358,56 +358,45 @@ export default function HRDashboard() {
     }
   }, [navigate]);
 
-  // Load data from localStorage
+  // Load data from API
   useEffect(() => {
-    if (userRole === "admin" || userRole === "hr") {
-      const savedEmployees = localStorage.getItem("hrEmployees");
-      const savedDepartments = localStorage.getItem("departments");
-      const savedLeaveRequests = localStorage.getItem("leaveRequests");
-      const savedSalaryRecords = localStorage.getItem("salaryRecords");
-      const savedAttendanceRecords = localStorage.getItem("attendanceRecords");
+    const loadData = async () => {
+      if (userRole === "admin" || userRole === "hr") {
+        try {
+          const [empRes, deptRes, leaveRes, salaryRes, attRes] = await Promise.all([
+            fetch("/api/employees"),
+            fetch("/api/departments"),
+            fetch("/api/leave-requests"),
+            fetch("/api/salary-records"),
+            fetch("/api/attendance"),
+          ]);
 
-      if (savedEmployees) setEmployees(JSON.parse(savedEmployees));
-      if (savedDepartments) setDepartments(JSON.parse(savedDepartments));
-      if (savedLeaveRequests) setLeaveRequests(JSON.parse(savedLeaveRequests));
-      if (savedSalaryRecords) setSalaryRecords(JSON.parse(savedSalaryRecords));
-      if (savedAttendanceRecords)
-        setAttendanceRecords(JSON.parse(savedAttendanceRecords));
-
-      // Initialize with default departments if none exist
-      if (!savedDepartments) {
-        const defaultDepartments = [
-          {
-            id: "1",
-            name: "Engineering",
-            manager: "John Smith",
-            employeeCount: 0,
-          },
-          {
-            id: "2",
-            name: "Marketing",
-            manager: "Sarah Johnson",
-            employeeCount: 0,
-          },
-          { id: "3", name: "Sales", manager: "Mike Davis", employeeCount: 0 },
-          { id: "4", name: "HR", manager: "Lisa Wilson", employeeCount: 0 },
-          {
-            id: "5",
-            name: "Finance",
-            manager: "David Brown",
-            employeeCount: 0,
-          },
-          {
-            id: "6",
-            name: "Operations",
-            manager: "Emma Wilson",
-            employeeCount: 0,
-          },
-        ];
-        setDepartments(defaultDepartments);
-        localStorage.setItem("departments", JSON.stringify(defaultDepartments));
+          if (empRes.ok) {
+            const empData = await empRes.json();
+            if (empData.success) setEmployees(empData.data);
+          }
+          if (deptRes.ok) {
+            const deptData = await deptRes.json();
+            if (deptData.success) setDepartments(deptData.data);
+          }
+          if (leaveRes.ok) {
+            const leaveData = await leaveRes.json();
+            if (leaveData.success) setLeaveRequests(leaveData.data);
+          }
+          if (salaryRes.ok) {
+            const salaryData = await salaryRes.json();
+            if (salaryData.success) setSalaryRecords(salaryData.data);
+          }
+          if (attRes.ok) {
+            const attData = await attRes.json();
+            if (attData.success) setAttendanceRecords(attData.data);
+          }
+        } catch (error) {
+          console.error("Failed to load HR data from API:", error);
+        }
       }
-    }
+    };
+    loadData();
   }, [userRole]);
 
   // Prepare attendance day map for active employees on selected date
@@ -442,25 +431,97 @@ export default function HRDashboard() {
     }
   }, [selectedEmployeeId, employees]);
 
-  // Save data to localStorage
-  const saveEmployees = (updatedEmployees: Employee[]) => {
+  // Save data to API
+  const saveEmployees = async (updatedEmployees: Employee[]) => {
     setEmployees(updatedEmployees);
-    localStorage.setItem("hrEmployees", JSON.stringify(updatedEmployees));
+    try {
+      for (const emp of updatedEmployees) {
+        if (emp._id) {
+          await fetch(`/api/employees/${emp._id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(emp),
+          });
+        } else {
+          await fetch("/api/employees", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(emp),
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to save employees:", error);
+    }
   };
 
-  const saveDepartments = (updatedDepartments: Department[]) => {
+  const saveDepartments = async (updatedDepartments: Department[]) => {
     setDepartments(updatedDepartments);
-    localStorage.setItem("departments", JSON.stringify(updatedDepartments));
+    try {
+      for (const dept of updatedDepartments) {
+        if (dept._id) {
+          await fetch(`/api/departments/${dept._id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dept),
+          });
+        } else {
+          await fetch("/api/departments", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dept),
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to save departments:", error);
+    }
   };
 
-  const saveLeaveRequests = (updatedRequests: LeaveRequest[]) => {
+  const saveLeaveRequests = async (updatedRequests: LeaveRequest[]) => {
     setLeaveRequests(updatedRequests);
-    localStorage.setItem("leaveRequests", JSON.stringify(updatedRequests));
+    try {
+      for (const req of updatedRequests) {
+        if (req._id) {
+          await fetch(`/api/leave-requests/${req._id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(req),
+          });
+        } else {
+          await fetch("/api/leave-requests", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(req),
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to save leave requests:", error);
+    }
   };
 
-  const saveSalaryRecords = (updatedRecords: SalaryRecord[]) => {
+  const saveSalaryRecords = async (updatedRecords: SalaryRecord[]) => {
     setSalaryRecords(updatedRecords);
-    localStorage.setItem("salaryRecords", JSON.stringify(updatedRecords));
+    try {
+      for (const record of updatedRecords) {
+        if (record._id) {
+          await fetch(`/api/salary-records/${record._id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(record),
+          });
+        } else {
+          await fetch("/api/salary-records", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(record),
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to save salary records:", error);
+    }
   };
 
   // Handle file uploads
