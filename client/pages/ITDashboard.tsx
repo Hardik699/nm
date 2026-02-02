@@ -125,13 +125,41 @@ export default function ITDashboard() {
       return;
     }
 
-    const its = localStorage.getItem("itAccounts");
-    const emps = localStorage.getItem("hrEmployees");
-    const depts = localStorage.getItem("departments");
+    const loadData = async () => {
+      try {
+        const [itsRes, empsRes, deptsRes] = await Promise.all([
+          fetch("/api/it-accounts"),
+          fetch("/api/employees"),
+          fetch("/api/departments"),
+        ]);
+
+        if (itsRes.ok) {
+          const itsData = await itsRes.json();
+          if (itsData.success) setRecords(itsData.data);
+        }
+        if (empsRes.ok) {
+          const empsData = await empsRes.json();
+          if (empsData.success) setEmployees(empsData.data);
+        }
+        if (deptsRes.ok) {
+          const deptsData = await deptsRes.json();
+          if (deptsData.success) setDepartments(deptsData.data);
+        }
+      } catch (error) {
+        console.error("Failed to load IT dashboard data:", error);
+        // Fall back to localStorage
+        const its = localStorage.getItem("itAccounts");
+        const emps = localStorage.getItem("hrEmployees");
+        const depts = localStorage.getItem("departments");
+        if (its) setRecords(JSON.parse(its));
+        if (emps) setEmployees(JSON.parse(emps));
+        if (depts) setDepartments(JSON.parse(depts));
+      }
+    };
+
+    loadData();
+
     const pending = localStorage.getItem("pendingITNotifications");
-    if (its) setRecords(JSON.parse(its));
-    if (emps) setEmployees(JSON.parse(emps));
-    if (depts) setDepartments(JSON.parse(depts));
     if (pending) {
       const notifications = JSON.parse(pending);
       // Only show unprocessed notifications
