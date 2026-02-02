@@ -270,11 +270,31 @@ export default function SystemInfoDetail() {
           : undefined,
     };
 
-    const next = [record, ...assets];
-    setAssets(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    setShowForm(false);
-    alert("Saved");
+    try {
+      const response = await fetch("/api/system-assets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(record),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        const next = [record, ...assets];
+        setAssets(next);
+        setShowForm(false);
+        alert("Saved");
+      } else {
+        alert("Error saving asset: " + result.error);
+      }
+    } catch (error) {
+      console.error("Failed to save asset:", error);
+      // Fall back to localStorage
+      const next = [record, ...assets];
+      setAssets(next);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      setShowForm(false);
+      alert("Saved (offline mode)");
+    }
   };
 
   return (
