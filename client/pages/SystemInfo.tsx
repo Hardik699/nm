@@ -141,12 +141,14 @@ export default function SystemInfo() {
   };
 
   // Export all system assets to Excel
-  const exportSystemAssetsToExcel = () => {
+  const exportSystemAssetsToExcel = async () => {
     try {
-      // Get all data from localStorage
-      const systemAssetsData = JSON.parse(
-        localStorage.getItem(STORAGE_KEY) || "[]",
-      );
+      // Get all data from API
+      const assetsResponse = await fetch("/api/system-assets");
+      const assetsResult = await assetsResponse.json();
+      const systemAssetsData = assetsResult.success ? assetsResult.data : [];
+
+      // For now, keep pcLaptopData in localStorage (can be migrated separately)
       const pcLaptopData = JSON.parse(
         localStorage.getItem("pcLaptopAssets") || "[]",
       );
