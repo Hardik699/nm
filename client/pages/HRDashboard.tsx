@@ -3422,6 +3422,13 @@ Generated on: ${new Date().toLocaleString()}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="space-y-2">
+                      <Label className="text-slate-300">HR ID</Label>
+                      <p className="text-slate-400 p-2 bg-slate-800/30 rounded border border-slate-700">
+                        {employeeDetailModal.employee.employeeId || "N/A"}
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
                       <Label className="text-slate-300">Full Name</Label>
                       {employeeDetailModal.isEditing ? (
                         <Input
