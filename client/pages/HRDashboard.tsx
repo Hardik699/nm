@@ -186,6 +186,7 @@ export default function HRDashboard() {
   // Employee form state
   const [newEmployee, setNewEmployee] = useState({
     // Personal Information
+    employeeId: "",
     fullName: "",
     fatherName: "",
     motherName: "",
