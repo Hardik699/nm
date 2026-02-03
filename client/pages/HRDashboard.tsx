@@ -603,6 +603,18 @@ export default function HRDashboard() {
     }
   };
 
+  // Generate next employee ID
+  const getNextEmployeeId = () => {
+    const empIds = employees
+      .filter((e) => e.employeeId?.startsWith("EMP-"))
+      .map((e) => {
+        const num = parseInt(e.employeeId?.replace("EMP-", "") || "0", 10);
+        return Number.isNaN(num) ? 0 : num;
+      });
+    const maxNum = empIds.length > 0 ? Math.max(...empIds) : 0;
+    return `EMP-${String(maxNum + 1).padStart(3, "0")}`;
+  };
+
   // Handle employee creation
   const handleCreateEmployee = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -653,7 +665,7 @@ export default function HRDashboard() {
 
     const employee: Employee = {
       id: Date.now().toString(),
-      employeeId: `EMP${Date.now().toString().slice(-4)}`,
+      employeeId: newEmployee.employeeId || getNextEmployeeId(),
       ...newEmployee,
       status: "active",
     };
