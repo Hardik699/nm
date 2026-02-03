@@ -1255,7 +1255,7 @@ Generated on: ${new Date().toLocaleString()}
 
     const emp1: Employee = {
       id: `${Date.now()}-1`,
-      employeeId: `EMP${(Date.now() + 1).toString().slice(-4)}`,
+      employeeId: `EMP-001`,
       fullName: "Rahul Sharma",
       fatherName: "Mahesh Sharma",
       motherName: "Suman Sharma",
