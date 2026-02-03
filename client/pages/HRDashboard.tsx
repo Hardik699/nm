@@ -1292,7 +1292,7 @@ Generated on: ${new Date().toLocaleString()}
 
     const emp2: Employee = {
       id: `${Date.now()}-2`,
-      employeeId: `EMP${(Date.now() + 2).toString().slice(-4)}`,
+      employeeId: `EMP-002`,
       fullName: "Priya Verma",
       fatherName: "Rakesh Verma",
       motherName: "Anita Verma",
