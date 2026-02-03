@@ -1602,7 +1602,9 @@ Generated on: ${new Date().toLocaleString()}
                           </Label>
                           <Input
                             id="hr-id"
-                            value={newEmployee.employeeId || getNextEmployeeId()}
+                            value={
+                              newEmployee.employeeId || getNextEmployeeId()
+                            }
                             readOnly
                             className="bg-slate-800/50 border-slate-700 text-slate-400"
                           />
@@ -2489,7 +2491,10 @@ Generated on: ${new Date().toLocaleString()}
                                   {employee.fullName}
                                 </h4>
                                 {employee.employeeId && (
-                                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                                  <Badge
+                                    variant="secondary"
+                                    className="bg-blue-500/20 text-blue-300 border-blue-500/30"
+                                  >
                                     {employee.employeeId}
                                   </Badge>
                                 )}
@@ -3245,7 +3250,10 @@ Generated on: ${new Date().toLocaleString()}
                           {employeeDetailModal.employee.department}
                         </span>
                         {employeeDetailModal.employee.employeeId && (
-                          <Badge variant="secondary" className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                          <Badge
+                            variant="secondary"
+                            className="bg-blue-500/20 text-blue-300 border-blue-500/30"
+                          >
                             {employeeDetailModal.employee.employeeId}
                           </Badge>
                         )}
