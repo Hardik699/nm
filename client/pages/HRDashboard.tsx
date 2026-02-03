@@ -3239,9 +3239,16 @@ Generated on: ${new Date().toLocaleString()}
                           ? "Edit Employee"
                           : "Employee Details"}
                       </CardTitle>
-                      <CardDescription className="text-slate-400">
-                        {employeeDetailModal.employee.fullName} -{" "}
-                        {employeeDetailModal.employee.department}
+                      <CardDescription className="text-slate-400 flex items-center space-x-2">
+                        <span>
+                          {employeeDetailModal.employee.fullName} -{" "}
+                          {employeeDetailModal.employee.department}
+                        </span>
+                        {employeeDetailModal.employee.employeeId && (
+                          <Badge variant="secondary" className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                            {employeeDetailModal.employee.employeeId}
+                          </Badge>
+                        )}
                       </CardDescription>
                     </div>
                   </div>
