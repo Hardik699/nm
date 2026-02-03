@@ -2488,6 +2488,11 @@ Generated on: ${new Date().toLocaleString()}
                                 <h4 className="text-white font-medium">
                                   {employee.fullName}
                                 </h4>
+                                {employee.employeeId && (
+                                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                                    {employee.employeeId}
+                                  </Badge>
+                                )}
                                 <Button
                                   onClick={() =>
                                     handleToggleEmployeeStatus(employee.id)
