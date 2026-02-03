@@ -703,6 +703,7 @@ export default function HRDashboard() {
 
     // Reset form
     setNewEmployee({
+      employeeId: "",
       fullName: "",
       fatherName: "",
       motherName: "",
